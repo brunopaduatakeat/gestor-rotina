@@ -12,7 +12,6 @@ export function QuickCapture({ autoFocus }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const addTodo = useTodosStore((s) => s.addTodo)
 
-  // Atalho global Ctrl+Space foca o input
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.code === 'Space') {
@@ -24,7 +23,6 @@ export function QuickCapture({ autoFocus }: Props) {
     return () => window.removeEventListener('keydown', handler)
   }, [])
 
-  // Preview da data detectada
   useEffect(() => {
     if (!text.trim()) { setHint(''); return }
     const results = parse(text, new Date(), { forwardDate: true })
@@ -49,7 +47,7 @@ export function QuickCapture({ autoFocus }: Props) {
         <input
           ref={inputRef}
           autoFocus={autoFocus}
-          className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder='Capturar tarefa… ex: "Revisar relatório amanhã 14h"  (Ctrl+Espaço)'
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -58,12 +56,12 @@ export function QuickCapture({ autoFocus }: Props) {
         <button
           type="submit"
           disabled={!text.trim()}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 rounded-lg text-sm font-medium transition-colors"
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white rounded-lg text-sm font-medium transition-colors"
         >
           Adicionar
         </button>
       </div>
-      {hint && <p className="text-xs text-blue-400 pl-1">{hint}</p>}
+      {hint && <p className="text-xs text-blue-600 dark:text-blue-400 pl-1">{hint}</p>}
     </form>
   )
 }

@@ -10,8 +10,10 @@ export function TodoList() {
   return (
     <div className="flex flex-col gap-6 max-w-2xl">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-slate-100">To-Do</h1>
-        <span className="text-xs text-slate-500">{pending.length} pendente{pending.length !== 1 ? 's' : ''}</span>
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">To-Do</h1>
+        <span className="text-xs text-slate-400 dark:text-slate-500">
+          {pending.length} pendente{pending.length !== 1 ? 's' : ''}
+        </span>
       </div>
 
       <QuickCapture autoFocus />
@@ -23,14 +25,14 @@ export function TodoList() {
       )}
 
       {pending.length === 0 && (
-        <p className="text-slate-500 text-sm text-center py-8">
+        <p className="text-slate-400 dark:text-slate-500 text-sm text-center py-8">
           Nenhuma tarefa pendente. Use a captura acima para adicionar.
         </p>
       )}
 
       {done.length > 0 && (
         <details className="group">
-          <summary className="text-xs text-slate-500 cursor-pointer hover:text-slate-400 select-none">
+          <summary className="text-xs text-slate-400 dark:text-slate-500 cursor-pointer hover:text-slate-600 dark:hover:text-slate-400 select-none">
             {done.length} concluída{done.length !== 1 ? 's' : ''}
           </summary>
           <ul className="flex flex-col gap-1 mt-2" role="list" aria-label="Tarefas concluídas">

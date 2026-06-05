@@ -47,10 +47,10 @@ export function KanbanBoard() {
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-semibold text-slate-100">Kanban</h1>
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Kanban</h1>
         <button
           onClick={() => setEditingCard('new')}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-medium transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-colors"
           aria-label="Novo cartão"
         >
           + Novo Cartão

@@ -58,91 +58,60 @@ export function CardModal({ card, onClose }: Props) {
     }
   }
 
+  const inputCls = 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-slate-400 dark:placeholder-slate-500 border border-slate-200 dark:border-transparent'
+  const selectCls = 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg px-2 py-1.5 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 border border-slate-200 dark:border-transparent'
+
   return (
     <dialog
       ref={dialogRef}
-      className="bg-slate-800 text-slate-100 rounded-2xl p-6 w-full max-w-lg shadow-2xl backdrop:bg-black/60 open:flex open:flex-col gap-4"
+      className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-2xl p-6 w-full max-w-lg shadow-2xl backdrop:bg-black/60 open:flex open:flex-col gap-4"
       onClose={onClose}
       aria-label={isNew ? 'Novo cartão' : 'Editar cartão'}
     >
       <h2 className="text-lg font-semibold">{isNew ? 'Novo Cartão' : 'Editar Cartão'}</h2>
 
-      <input
-        className="bg-slate-700 rounded-lg px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-        placeholder="Título *"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        autoFocus
-      />
-      <textarea
-        className="bg-slate-700 rounded-lg px-3 py-2 text-sm w-full resize-none h-20 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        placeholder="Descrição"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-      />
+      <input className={inputCls} placeholder="Título *" value={title}
+        onChange={(e) => setTitle(e.target.value)} autoFocus />
+
+      <textarea className={`${inputCls} resize-none h-20`} placeholder="Descrição"
+        value={description} onChange={(e) => setDescription(e.target.value)} />
 
       <div className="grid grid-cols-2 gap-3">
-        <label className="flex flex-col gap-1 text-xs text-slate-400">
+        <label className="flex flex-col gap-1 text-xs text-slate-500 dark:text-slate-400">
           Status
-          <select
-            className="bg-slate-700 rounded-lg px-2 py-1.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={status}
-            onChange={(e) => setStatus(e.target.value as CardStatus)}
-          >
+          <select className={selectCls} value={status} onChange={(e) => setStatus(e.target.value as CardStatus)}>
             {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-xs text-slate-400">
+        <label className="flex flex-col gap-1 text-xs text-slate-500 dark:text-slate-400">
           Prioridade
-          <select
-            className="bg-slate-700 rounded-lg px-2 py-1.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={priority}
-            onChange={(e) => setPriority(e.target.value as Priority)}
-          >
+          <select className={selectCls} value={priority} onChange={(e) => setPriority(e.target.value as Priority)}>
             {PRIORITIES.map((p) => <option key={p} value={p}>{PRIORITY_LABELS[p]}</option>)}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-xs text-slate-400">
+        <label className="flex flex-col gap-1 text-xs text-slate-500 dark:text-slate-400">
           Prazo
-          <input
-            type="date"
-            className="bg-slate-700 rounded-lg px-2 py-1.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-          />
+          <input type="date" className={selectCls} value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
         </label>
-        <label className="flex flex-col gap-1 text-xs text-slate-400">
+        <label className="flex flex-col gap-1 text-xs text-slate-500 dark:text-slate-400">
           Tags (separadas por vírgula)
-          <input
-            className="bg-slate-700 rounded-lg px-2 py-1.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="ex: urgente, cliente"
-            value={tags}
-            onChange={(e) => setTags(e.target.value)}
-          />
+          <input className={selectCls} placeholder="ex: urgente, cliente" value={tags}
+            onChange={(e) => setTags(e.target.value)} />
         </label>
       </div>
 
       <div className="flex justify-between mt-2">
         {!isNew && (
-          <button
-            onClick={handleDelete}
-            className="text-red-400 text-sm hover:text-red-300 transition-colors"
-          >
+          <button onClick={handleDelete} className="text-red-500 dark:text-red-400 text-sm hover:text-red-600 dark:hover:text-red-300 transition-colors">
             Excluir
           </button>
         )}
         <div className="flex gap-2 ml-auto">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm text-slate-400 hover:text-slate-200 transition-colors"
-          >
+          <button onClick={onClose} className="px-4 py-2 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors">
             Cancelar
           </button>
-          <button
-            onClick={handleSave}
-            disabled={!title.trim()}
-            className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-500 disabled:opacity-40 rounded-lg transition-colors font-medium"
-          >
+          <button onClick={handleSave} disabled={!title.trim()}
+            className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white rounded-lg transition-colors font-medium">
             {isNew ? 'Criar' : 'Salvar'}
           </button>
         </div>
