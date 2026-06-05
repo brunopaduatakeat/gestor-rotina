@@ -6,6 +6,9 @@ import { TeamPage } from './pages/TeamPage'
 import { ProjectsPage } from './pages/ProjectsPage'
 import { TodayPage } from './pages/TodayPage'
 import { useTheme } from './hooks/useTheme'
+import { useAlarmScheduler } from './hooks/useAlarmScheduler'
+import { NotificationPermission, NotificationStatus } from './components/notifications/NotificationPermission'
+import { AlarmModal } from './components/notifications/AlarmModal'
 
 type Page = 'today' | 'kanban' | 'todo' | 'meetings' | 'team' | 'projects'
 
@@ -21,6 +24,7 @@ const NAV: { id: Page; label: string }[] = [
 export default function App() {
   const [page, setPage] = useState<Page>('today')
   const { theme, toggle } = useTheme()
+  const { activeAlarm, dismissAlarm } = useAlarmScheduler()
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-200">
@@ -67,6 +71,9 @@ export default function App() {
         </button>
       </header>
 
+      {/* Banner de permissão de notificações */}
+      <NotificationPermission />
+
       {/* Conteúdo */}
       <main className="flex-1 overflow-auto p-6">
         {page === 'today'    && <TodayPage />}
@@ -76,6 +83,14 @@ export default function App() {
         {page === 'team'     && <TeamPage />}
         {page === 'projects' && <ProjectsPage />}
       </main>
+
+      {/* Rodapé: status de notificações */}
+      <footer className="border-t border-slate-200 dark:border-slate-800 px-6 py-2 flex justify-end">
+        <NotificationStatus />
+      </footer>
+
+      {/* Modal intrusivo de alarme */}
+      {activeAlarm && <AlarmModal alarm={activeAlarm} onDismiss={dismissAlarm} />}
     </div>
   )
 }

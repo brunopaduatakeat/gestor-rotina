@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { calcPersonMetrics, calcTodayData } from '../metrics'
-import type { Card, Meeting, FollowUp, Todo } from '../types'
+import type { Card, Meeting, Todo } from '../types'
 
 const DAY = 1000 * 60 * 60 * 24
 const NOW = Date.now()
@@ -27,12 +27,6 @@ function makeTodo(overrides: Partial<Todo> = {}): Todo {
   }
 }
 
-function makeFollowUp(overrides: Partial<FollowUp> = {}): FollowUp {
-  return {
-    id: crypto.randomUUID(), meetingId: 'x', personId: 'p1', description: 'test',
-    done: false, linkedCardId: null, linkedTodoId: null, createdAt: NOW, updatedAt: NOW, ...overrides,
-  }
-}
 
 describe('calcPersonMetrics', () => {
   it('conta cartões ativos (exclui done)', () => {
