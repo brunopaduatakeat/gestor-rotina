@@ -16,16 +16,11 @@ export const logRepo = {
   },
 
   async listByEntity(entityType: EntityType, entityId: string): Promise<LogEntry[]> {
-    return db.logEntries
-      .where('[entityType+entityId]')
-      .equals([entityType, entityId])
-      .sortBy('createdAt')
-      .catch(() =>
-        // fallback caso o índice composto não exista (migration futura)
-        db.logEntries
-          .filter((e) => e.entityType === entityType && e.entityId === entityId)
-          .toArray()
-      )
+    const entries = await db.logEntries
+      .where('entityId').equals(entityId)
+      .filter((e) => e.entityType === entityType)
+      .toArray()
+    return entries.sort((a, b) => a.createdAt - b.createdAt)
   },
 
   async listAll(filters?: { entityType?: EntityType; from?: number; to?: number }): Promise<LogEntry[]> {

@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { KanbanPage } from './pages/KanbanPage'
 import { TodoPage } from './pages/TodoPage'
+import { MeetingsPage } from './pages/MeetingsPage'
 import { useTheme } from './hooks/useTheme'
 
-type Page = 'kanban' | 'todo'
+type Page = 'kanban' | 'todo' | 'meetings'
 
 const NAV: { id: Page; label: string }[] = [
   { id: 'kanban', label: 'Kanban' },
   { id: 'todo', label: 'To-Do' },
+  { id: 'meetings', label: 'Reuniões' },
 ]
 
 export default function App() {
@@ -65,6 +67,7 @@ export default function App() {
       <main className="flex-1 overflow-auto p-6">
         {page === 'kanban' && <KanbanPage />}
         {page === 'todo' && <TodoPage />}
+        {page === 'meetings' && <MeetingsPage />}
       </main>
     </div>
   )
