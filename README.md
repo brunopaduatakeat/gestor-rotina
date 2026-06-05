@@ -11,7 +11,7 @@ Kanban, To-Do, Reuniões categorizadas, Carteiras, Tracking de Projetos e integr
 - **Backend:** Vercel Serverless Functions (`/api`)
 - **Banco serverless:** Turso (libSQL)
 - **Notificações:** Web Push API + Service Worker
-- **Deploy:** Vercel (CI/CD via GitHub)
+- **Deploy:** Netlify (CI/CD via GitHub)
 
 ## Setup local
 
@@ -35,7 +35,7 @@ npm run dev
 
 Veja `.env.example` para a lista completa. **Nunca commite `.env.local`.**
 
-Na Vercel, configure todas as variáveis em **Project Settings → Environment Variables**
+No Netlify, configure todas as variáveis em **Site Settings → Environment Variables**
 com os escopos Production / Preview / Development conforme necessário.
 
 ## Google OAuth — redirect URI
@@ -43,15 +43,15 @@ com os escopos Production / Preview / Development conforme necessário.
 O Google exige URIs de redirect **exatas e cadastradas** (sem wildcard).
 
 - Cadastre **apenas o domínio de produção** como redirect URI:
-  `https://seu-dominio.vercel.app/api/auth/callback`
+  `https://seu-dominio.netlify.app/api/auth/callback`
 - Para validar em preview, aponte o OAuth para o mesmo domínio de produção
-  ou configure um alias fixo na Vercel.
+  ou configure um alias fixo no Netlify.
 - Nunca use URLs de preview dinâmicas como redirect URI.
 
 ## Deploy
 
 Push na `main` → deploy de produção automático.
-Pull Requests → Preview Deployment isolado.
+Pull Requests → Deploy Preview isolado.
 
 ## Estrutura de pastas
 
