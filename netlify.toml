@@ -19,3 +19,12 @@
   to = "/.netlify/functions/:splat"
   status = 200
   force = true
+
+# ── Scheduled Functions (Cron) ────────────────────────────────────────────────
+# Sync bidirecional com Google Calendar: a cada 15 minutos
+[functions."cron/sync-calendar"]
+  schedule = "*/15 * * * *"
+
+# Push de lembretes: a cada minuto
+[functions."cron/push-reminders"]
+  schedule = "* * * * *"

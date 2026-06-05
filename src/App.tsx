@@ -5,12 +5,13 @@ import { MeetingsPage } from './pages/MeetingsPage'
 import { TeamPage } from './pages/TeamPage'
 import { ProjectsPage } from './pages/ProjectsPage'
 import { TodayPage } from './pages/TodayPage'
+import { SettingsPage } from './pages/SettingsPage'
 import { useTheme } from './hooks/useTheme'
 import { useAlarmScheduler } from './hooks/useAlarmScheduler'
 import { NotificationPermission, NotificationStatus } from './components/notifications/NotificationPermission'
 import { AlarmModal } from './components/notifications/AlarmModal'
 
-type Page = 'today' | 'kanban' | 'todo' | 'meetings' | 'team' | 'projects'
+type Page = 'today' | 'kanban' | 'todo' | 'meetings' | 'team' | 'projects' | 'settings'
 
 const NAV: { id: Page; label: string }[] = [
   { id: 'today',    label: 'Hoje' },
@@ -19,6 +20,7 @@ const NAV: { id: Page; label: string }[] = [
   { id: 'meetings', label: 'Reuniões' },
   { id: 'team',     label: 'Equipe' },
   { id: 'projects', label: 'Projetos' },
+  { id: 'settings', label: 'Config' },
 ]
 
 export default function App() {
@@ -81,7 +83,8 @@ export default function App() {
         {page === 'todo'     && <TodoPage />}
         {page === 'meetings' && <MeetingsPage />}
         {page === 'team'     && <TeamPage />}
-        {page === 'projects' && <ProjectsPage />}
+        {page === 'projects'  && <ProjectsPage />}
+        {page === 'settings'  && <SettingsPage />}
       </main>
 
       {/* Rodapé: status de notificações */}
