@@ -1,0 +1,13 @@
+{
+  "name": "Gestor de Rotina",
+  "short_name": "Gestor",
+  "description": "Gestão de rotina e equipe — Kanban, To-Do, Reuniões, Projetos",
+  "theme_color": "#1e293b",
+  "background_color": "#0f172a",
+  "display": "standalone",
+  "start_url": "/",
+  "icons": [
+    { "src": "/icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" },
+    { "src": "/icons/icon-512.svg", "sizes": "512x512", "type": "image/svg+xml" }
+  ]
+}
