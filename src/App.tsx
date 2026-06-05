@@ -1,15 +1,19 @@
-import { useState } from 'react'
-import { KanbanPage } from './pages/KanbanPage'
-import { TodoPage } from './pages/TodoPage'
-import { MeetingsPage } from './pages/MeetingsPage'
-import { TeamPage } from './pages/TeamPage'
-import { ProjectsPage } from './pages/ProjectsPage'
-import { TodayPage } from './pages/TodayPage'
-import { SettingsPage } from './pages/SettingsPage'
+import { lazy, Suspense, useState } from 'react'
 import { useTheme } from './hooks/useTheme'
 import { useAlarmScheduler } from './hooks/useAlarmScheduler'
+import { useAutoBackup } from './hooks/useAutoBackup'
 import { NotificationPermission, NotificationStatus } from './components/notifications/NotificationPermission'
 import { AlarmModal } from './components/notifications/AlarmModal'
+import { ErrorBoundary, ErrorFallback } from './components/ErrorBoundary'
+
+// Lazy loading por rota — cada página é um chunk separado
+const TodayPage    = lazy(() => import('./pages/TodayPage').then((m) => ({ default: m.TodayPage })))
+const KanbanPage   = lazy(() => import('./pages/KanbanPage').then((m) => ({ default: m.KanbanPage })))
+const TodoPage     = lazy(() => import('./pages/TodoPage').then((m) => ({ default: m.TodoPage })))
+const MeetingsPage = lazy(() => import('./pages/MeetingsPage').then((m) => ({ default: m.MeetingsPage })))
+const TeamPage     = lazy(() => import('./pages/TeamPage').then((m) => ({ default: m.TeamPage })))
+const ProjectsPage = lazy(() => import('./pages/ProjectsPage').then((m) => ({ default: m.ProjectsPage })))
+const SettingsPage = lazy(() => import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage })))
 
 type Page = 'today' | 'kanban' | 'todo' | 'meetings' | 'team' | 'projects' | 'settings'
 
@@ -23,10 +27,19 @@ const NAV: { id: Page; label: string }[] = [
   { id: 'settings', label: 'Config' },
 ]
 
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-40">
+      <span className="text-slate-400 dark:text-slate-500 text-sm animate-pulse">Carregando…</span>
+    </div>
+  )
+}
+
 export default function App() {
   const [page, setPage] = useState<Page>('today')
   const { theme, toggle } = useTheme()
   const { activeAlarm, dismissAlarm } = useAlarmScheduler()
+  useAutoBackup()
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-200">
@@ -78,13 +91,17 @@ export default function App() {
 
       {/* Conteúdo */}
       <main className="flex-1 overflow-auto p-6">
-        {page === 'today'    && <TodayPage />}
-        {page === 'kanban'   && <KanbanPage />}
-        {page === 'todo'     && <TodoPage />}
-        {page === 'meetings' && <MeetingsPage />}
-        {page === 'team'     && <TeamPage />}
-        {page === 'projects'  && <ProjectsPage />}
-        {page === 'settings'  && <SettingsPage />}
+        <ErrorBoundary fallback={(props) => <ErrorFallback error={props.error as Error} resetError={props.resetError} />}>
+          <Suspense fallback={<PageLoader />}>
+            {page === 'today'    && <TodayPage />}
+            {page === 'kanban'   && <KanbanPage />}
+            {page === 'todo'     && <TodoPage />}
+            {page === 'meetings' && <MeetingsPage />}
+            {page === 'team'     && <TeamPage />}
+            {page === 'projects' && <ProjectsPage />}
+            {page === 'settings' && <SettingsPage />}
+          </Suspense>
+        </ErrorBoundary>
       </main>
 
       {/* Rodapé: status de notificações */}

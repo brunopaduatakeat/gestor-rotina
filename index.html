@@ -4,16 +4,24 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#1e293b" />
+    <meta name="description" content="Gestor de rotina e equipe — Kanban, To-Do, Reuniões, Projetos" />
+
     <link rel="icon" type="image/svg+xml" href="/icons/icon-192.svg" />
     <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
+
+    <!-- Preconnect para Google APIs (OAuth/Calendar) -->
+    <link rel="preconnect" href="https://accounts.google.com" />
+    <link rel="preconnect" href="https://www.googleapis.com" />
+
     <title>Gestor de Rotina</title>
+
     <script>
       // Aplica tema antes do React renderizar (evita flash)
       const saved = localStorage.getItem('theme')
       if (saved === 'light') {
         document.documentElement.classList.remove('dark')
       } else {
-        // Padrão: escuro
         document.documentElement.classList.add('dark')
       }
     </script>
