@@ -1,5 +1,5 @@
 import { google } from 'googleapis'
-import { getDB, ensureTables } from '../_db.mjs'
+import { getDB, ensureTables } from './_db.mjs'
 
 /**
  * GET /api/auth/callback?code=...

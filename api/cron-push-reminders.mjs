@@ -1,5 +1,5 @@
 import { schedule } from '@netlify/functions'
-import { getDB, ensureTables } from '../_db.mjs'
+import { getDB, ensureTables } from './_db.mjs'
 import webpush from 'web-push'
 
 const LOOK_AHEAD_MS = 16 * 60 * 1000  // notifica eventos nos próximos 16 min

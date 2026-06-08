@@ -1,6 +1,6 @@
 import { google } from 'googleapis'
-import { getDB, ensureTables } from '../_db.mjs'
-import { getAuthenticatedClient } from '../_oauth.mjs'
+import { getDB, ensureTables } from './_db.mjs'
+import { getAuthenticatedClient } from './_oauth.mjs'
 
 const CALENDAR_ID = 'primary'
 const cors = {

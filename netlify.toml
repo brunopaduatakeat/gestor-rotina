@@ -7,24 +7,47 @@
   NODE_VERSION = "20"
 
 # ── Redirects ─────────────────────────────────────────────────────────────────
-# IMPORTANTE: regras mais específicas primeiro
+# Rotas específicas da API primeiro (evita ser capturado pelo SPA catch-all)
 
-# /api/* → Netlify Functions (deve vir ANTES do wildcard SPA)
 [[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
+  from = "/api/auth/google"
+  to = "/.netlify/functions/auth-google"
   status = 200
   force = true
 
-# Todas as demais rotas → SPA (React Router client-side)
+[[redirects]]
+  from = "/api/auth/callback"
+  to = "/.netlify/functions/auth-callback"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/auth/status"
+  to = "/.netlify/functions/auth-status"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/auth/debug"
+  to = "/.netlify/functions/auth-debug"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/sync/calendar"
+  to = "/.netlify/functions/sync-calendar"
+  status = 200
+  force = true
+
+# SPA catch-all (deve ser sempre o último)
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
 # ── Scheduled Functions (Cron) ────────────────────────────────────────────────
-[functions."cron/sync-calendar"]
+[functions."cron-sync-calendar"]
   schedule = "*/15 * * * *"
 
-[functions."cron/push-reminders"]
+[functions."cron-push-reminders"]
   schedule = "* * * * *"

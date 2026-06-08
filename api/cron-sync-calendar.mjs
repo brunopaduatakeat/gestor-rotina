@@ -1,8 +1,8 @@
 import { schedule } from '@netlify/functions'
-import { ensureTables } from '../_db.mjs'
-import { getAuthenticatedClient, isConnected } from '../_oauth.mjs'
+import { ensureTables } from './_db.mjs'
+import { getAuthenticatedClient, isConnected } from './_oauth.mjs'
 import { google } from 'googleapis'
-import { getDB } from '../_db.mjs'
+import { getDB } from './_db.mjs'
 
 const CALENDAR_ID = 'primary'
 

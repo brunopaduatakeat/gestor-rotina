@@ -3,7 +3,7 @@
  * Endpoint temporário de diagnóstico — REMOVER após resolver o problema.
  * Verifica se as variáveis de ambiente e conexão Turso estão OK.
  */
-import { getDB, ensureTables } from '../_db.mjs'
+import { getDB, ensureTables } from './_db.mjs'
 
 export const handler = async () => {
   const checks = {
