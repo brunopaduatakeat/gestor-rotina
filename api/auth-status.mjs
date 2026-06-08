@@ -1,5 +1,5 @@
 import { ensureTables } from './_db.mjs'
-import { isConnected } from '../_oauth.mjs'
+import { isConnected } from './_oauth.mjs'
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
