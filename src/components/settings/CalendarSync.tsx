@@ -30,8 +30,7 @@ export function CalendarSync() {
       window.history.replaceState(null, '', window.location.pathname)
     }
     if (params.get('error')) {
-      const detail = params.get('detail') ? ` — ${params.get('detail')}` : ''
-      setSyncError(`Erro OAuth: ${params.get('error')}${detail}`)
+      setSyncError(`Erro OAuth: ${params.get('error')}`)
       window.history.replaceState(null, '', window.location.pathname)
     }
   }, [])

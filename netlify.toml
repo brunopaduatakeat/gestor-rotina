@@ -27,11 +27,6 @@
   status = 200
   force = true
 
-[[redirects]]
-  from = "/api/auth/debug"
-  to = "/.netlify/functions/auth-debug"
-  status = 200
-  force = true
 
 [[redirects]]
   from = "/api/sync/calendar"
