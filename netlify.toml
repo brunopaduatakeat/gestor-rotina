@@ -6,25 +6,25 @@
 [build.environment]
   NODE_VERSION = "20"
 
-# Redireciona todas as rotas para o index.html (SPA)
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  force = false
+# ── Redirects ─────────────────────────────────────────────────────────────────
+# IMPORTANTE: regras mais específicas primeiro
 
-# Exceção: functions /api/* não são redirecionadas
+# /api/* → Netlify Functions (deve vir ANTES do wildcard SPA)
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
   force = true
 
+# Todas as demais rotas → SPA (React Router client-side)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
 # ── Scheduled Functions (Cron) ────────────────────────────────────────────────
-# Sync bidirecional com Google Calendar: a cada 15 minutos
 [functions."cron/sync-calendar"]
   schedule = "*/15 * * * *"
 
-# Push de lembretes: a cada minuto
 [functions."cron/push-reminders"]
   schedule = "* * * * *"
