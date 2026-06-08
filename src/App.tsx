@@ -36,7 +36,11 @@ function PageLoader() {
 }
 
 export default function App() {
-  const [page, setPage] = useState<Page>('today')
+  const [page, setPage] = useState<Page>(() => {
+    // Se voltou do OAuth, abre direto em Config
+    if (window.location.hash.includes('settings')) return 'settings'
+    return 'today'
+  })
   const { theme, toggle } = useTheme()
   const { activeAlarm, dismissAlarm } = useAlarmScheduler()
   useAutoBackup()

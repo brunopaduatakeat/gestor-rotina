@@ -18,15 +18,20 @@ export function CalendarSync() {
   useEffect(() => {
     checkCalendarStatus().then(setConnected)
 
-    // Detecta retorno do fluxo OAuth pela hash
-    const params = new URLSearchParams(window.location.hash.replace('#settings?', '').replace('#settings', ''))
+    // Detecta retorno do fluxo OAuth — suporta /#settings?connected=1 e ?connected=1
+    const hashQuery = window.location.hash.includes('?')
+      ? window.location.hash.slice(window.location.hash.indexOf('?') + 1)
+      : ''
+    const searchQuery = window.location.search.slice(1)
+    const params = new URLSearchParams(hashQuery || searchQuery)
+
     if (params.get('connected') === '1') {
       setConnected(true)
-      window.history.replaceState(null, '', '/')
+      window.history.replaceState(null, '', window.location.pathname)
     }
     if (params.get('error')) {
       setSyncError(`Erro OAuth: ${params.get('error')}`)
-      window.history.replaceState(null, '', '/')
+      window.history.replaceState(null, '', window.location.pathname)
     }
   }, [])
 
