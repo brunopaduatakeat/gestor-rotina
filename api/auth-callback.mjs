@@ -45,7 +45,9 @@ export const handler = async (event) => {
     return redirect('/#settings?connected=1')
   } catch (err) {
     console.error('OAuth callback error:', err)
-    return redirect('/#settings?error=oauth_failed')
+    // Temporário: expõe a mensagem de erro para diagnóstico
+    const msg = encodeURIComponent(err.message?.slice(0, 120) ?? 'unknown')
+    return redirect(`/#settings?error=oauth_failed&detail=${msg}`)
   }
 }
 
