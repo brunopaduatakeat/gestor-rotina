@@ -24,7 +24,7 @@ export const handler = async (event) => {
     }
 
     const row = await db.execute({
-      sql: 'SELECT id, name, email, role, password_hash FROM users WHERE email = ? LIMIT 1',
+      sql: 'SELECT id, name, email, role, password_hash, person_id FROM users WHERE email = ? LIMIT 1',
       args: [email.toLowerCase().trim()],
     })
 
@@ -47,11 +47,13 @@ export const handler = async (event) => {
       }
     }
 
+    const personId = user.person_id ?? null
     const token = signToken({
-      userId: user.id,
-      email:  user.email,
-      name:   user.name,
-      role:   user.role,
+      userId:   user.id,
+      email:    user.email,
+      name:     user.name,
+      role:     user.role,
+      personId,
     })
 
     return {
@@ -59,7 +61,7 @@ export const handler = async (event) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         token,
-        user: { id: user.id, name: user.name, email: user.email, role: user.role },
+        user: { id: user.id, name: user.name, email: user.email, role: user.role, personId },
       }),
     }
   } catch (err) {

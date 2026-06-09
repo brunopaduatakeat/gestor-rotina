@@ -54,6 +54,10 @@ export async function ensureTables() {
     user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     expires_at INTEGER NOT NULL
   )`)
+  // Migração: adiciona person_id à tabela users (ignora se já existir)
+  try {
+    await db.execute(`ALTER TABLE users ADD COLUMN person_id TEXT`)
+  } catch (_) { /* coluna já existe — ok */ }
   // ── Google Calendar por usuário ────────────────────────────────────────────
   await db.execute(`CREATE TABLE IF NOT EXISTS user_google_tokens (
     user_id       TEXT PRIMARY KEY,

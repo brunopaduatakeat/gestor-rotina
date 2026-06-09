@@ -1,5 +1,8 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useProjectsStore } from '../../store/projects'
+import { useKanbanStore } from '../../store/kanban'
+import { useMeetingsStore } from '../../store/meetings'
+import { useAuthStore } from '../../store/auth'
 import { ProjectCard } from './ProjectCard'
 import { ProjectForm } from './ProjectForm'
 import type { ProjectStatus } from '../../domain/types'
@@ -13,20 +16,49 @@ const STATUS_FILTERS: { value: ProjectStatus | 'all'; label: string }[] = [
 ]
 
 export function ProjectList() {
-  const { projects } = useProjectsStore()
+  const { projects }  = useProjectsStore()
+  const { cards }     = useKanbanStore()
+  const { meetings }  = useMeetingsStore()
+  const { user }      = useAuthStore()
   const [showForm, setShowForm] = useState(false)
-  const [filter, setFilter] = useState<ProjectStatus | 'all'>('all')
+  const [filter, setFilter]     = useState<ProjectStatus | 'all'>('all')
 
-  const filtered = filter === 'all' ? projects : projects.filter((p) => p.status === filter)
+  const isManager  = user?.role === 'manager'
+  const myPersonId = user?.personId ?? null
+
+  // Membros veem apenas projetos em que têm cards ou reuniões
+  const visibleProjects = useMemo(() => {
+    if (isManager) return projects
+    if (!myPersonId) return []
+
+    const projectIdsFromCards = new Set(
+      cards
+        .filter((c) => c.personId === myPersonId && c.projectId)
+        .map((c) => c.projectId!)
+    )
+    const projectIdsFromMeetings = new Set(
+      meetings
+        .filter((m) => m.personIds.includes(myPersonId) && m.projectId)
+        .map((m) => m.projectId!)
+    )
+    const myProjectIds = new Set([...projectIdsFromCards, ...projectIdsFromMeetings])
+    return projects.filter((p) => myProjectIds.has(p.id))
+  }, [projects, cards, meetings, isManager, myPersonId])
+
+  const filtered = filter === 'all'
+    ? visibleProjects
+    : visibleProjects.filter((p) => p.status === filter)
 
   return (
     <div className="flex flex-col gap-6 max-w-4xl">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Projetos</h1>
-        <button onClick={() => setShowForm(true)}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-colors">
-          + Novo Projeto
-        </button>
+        {isManager && (
+          <button onClick={() => setShowForm(true)}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-colors">
+            + Novo Projeto
+          </button>
+        )}
       </div>
 
       <div className="flex gap-2 flex-wrap">
@@ -44,7 +76,9 @@ export function ProjectList() {
 
       {filtered.length === 0 ? (
         <p className="text-slate-400 dark:text-slate-500 text-sm text-center py-10">
-          Nenhum projeto encontrado.
+          {isManager
+            ? 'Nenhum projeto encontrado.'
+            : 'Você ainda não está associado a nenhum projeto.'}
         </p>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

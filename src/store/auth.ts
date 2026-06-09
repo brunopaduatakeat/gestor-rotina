@@ -7,6 +7,8 @@ export interface AuthUser {
   name: string
   email: string
   role: UserRole
+  /** ID do Person no IndexedDB vinculado a este usuário (null para o gestor) */
+  personId: string | null
 }
 
 interface AuthStore {

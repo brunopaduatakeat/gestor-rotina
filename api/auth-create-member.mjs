@@ -50,9 +50,9 @@ export const handler = async (event) => {
     const userId = crypto.randomUUID()
 
     await db.execute({
-      sql: `INSERT INTO users (id, name, email, role, password_hash, created_at)
-            VALUES (?, ?, ?, 'member', ?, ?)`,
-      args: [userId, name.trim(), email.toLowerCase().trim(), passwordHash, Date.now()],
+      sql: `INSERT INTO users (id, name, email, role, password_hash, person_id, created_at)
+            VALUES (?, ?, ?, 'member', ?, ?, ?)`,
+      args: [userId, name.trim(), email.toLowerCase().trim(), passwordHash, personId ?? null, Date.now()],
     })
 
     return {

@@ -21,7 +21,7 @@ export const handler = async (event) => {
     await ensureTables()
     const db = getDB()
     const row = await db.execute({
-      sql: 'SELECT id, name, email, role, created_at FROM users WHERE id = ? LIMIT 1',
+      sql: 'SELECT id, name, email, role, person_id FROM users WHERE id = ? LIMIT 1',
       args: [payload.userId],
     })
 
@@ -37,7 +37,7 @@ export const handler = async (event) => {
     return {
       statusCode: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
-      body: JSON.stringify({ user: { id: user.id, name: user.name, email: user.email, role: user.role } }),
+      body: JSON.stringify({ user: { id: user.id, name: user.name, email: user.email, role: user.role, personId: user.person_id ?? null } }),
     }
   } catch (err) {
     console.error('[auth-me]', err)

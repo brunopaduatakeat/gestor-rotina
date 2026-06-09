@@ -1,30 +1,50 @@
 import { useTodosStore } from '../../store/todos'
 import { useKanbanStore } from '../../store/kanban'
+import { useAuthStore } from '../../store/auth'
 import { QuickCapture } from './QuickCapture'
 import { TodoItem } from './TodoItem'
 
 export function TodoList() {
   const todos = useTodosStore((s) => s.todos)
   const cards = useKanbanStore((s) => s.cards)
+  const { user } = useAuthStore()
+
+  const isManager  = user?.role === 'manager'
+  const myPersonId = user?.personId ?? null
 
   // Mapa cardId → cardTitle para exibir contexto
   const cardMap = Object.fromEntries(cards.map((c) => [c.id, c.title]))
 
-  // Standalone: não promovidos, não vinculados a card
-  const standalone = todos.filter((t) => !t.promotedToCardId && !t.cardId)
-  const standalonePending = standalone.filter((t) => !t.done)
-  const standaloneDone = standalone.filter((t) => t.done)
+  // --- Filtro por papel ---
+  // Gestor: vê todos sem personId (os seus) + pode filtrar por pessoa na aba Equipe
+  // Membro: vê apenas todos com o seu personId
+  const visibleTodos = isManager
+    ? todos
+    : todos.filter((t) => t.personId === myPersonId)
 
-  // Vinculados a cards: pendentes
-  const cardLinkedPending = todos.filter((t) => !!t.cardId && !t.done)
-  const cardLinkedDone = todos.filter((t) => !!t.cardId && t.done)
+  // Standalone: não promovidos, não vinculados a card
+  const standalone        = visibleTodos.filter((t) => !t.promotedToCardId && !t.cardId)
+  const standalonePending = standalone.filter((t) => !t.done)
+  const standaloneDone    = standalone.filter((t) => t.done)
+
+  // Vinculados a cards
+  const cardLinkedPending = visibleTodos.filter((t) => !!t.cardId && !t.done)
+  const cardLinkedDone    = visibleTodos.filter((t) => !!t.cardId && t.done)
 
   const totalPending = standalonePending.length + cardLinkedPending.length
+
+  // Label de contexto para membros
+  const memberBadge = !isManager && myPersonId
+    ? <span className="text-xs bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full">Minhas tarefas</span>
+    : null
 
   return (
     <div className="flex flex-col gap-6 max-w-2xl">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">To-Do</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">To-Do</h1>
+          {memberBadge}
+        </div>
         <span className="text-xs text-slate-400 dark:text-slate-500">
           {totalPending} pendente{totalPending !== 1 ? 's' : ''}
         </span>
@@ -32,7 +52,7 @@ export function TodoList() {
 
       <QuickCapture autoFocus />
 
-      {/* Tarefas standalone */}
+      {/* Tarefas standalone pendentes */}
       {standalonePending.length > 0 && (
         <ul className="flex flex-col gap-1" role="list" aria-label="Tarefas pendentes">
           {standalonePending.map((t) => <TodoItem key={t.id} todo={t} />)}
@@ -59,7 +79,7 @@ export function TodoList() {
         </div>
       )}
 
-      {/* Concluídas (standalone + card-linked) */}
+      {/* Concluídas */}
       {(standaloneDone.length > 0 || cardLinkedDone.length > 0) && (
         <details className="group">
           <summary className="text-xs text-slate-400 dark:text-slate-500 cursor-pointer hover:text-slate-600 dark:hover:text-slate-400 select-none">

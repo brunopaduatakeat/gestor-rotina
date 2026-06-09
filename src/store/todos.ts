@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import * as chrono from 'chrono-node'
 import { todosRepo } from '../adapters/repositories/todos'
 import { useKanbanStore } from './kanban'
+import { useAuthStore } from './auth'
 import type { Todo } from '../domain/types'
 
 interface TodoStore {
@@ -53,14 +54,23 @@ export const useTodosStore = create<TodoStore>((set, get) => ({
 
   addTodo: async (rawText) => {
     const { title, dueDate } = parseCapture(rawText)
-    const todo = await todosRepo.create({ title, done: false, dueDate, personId: null, cardId: null })
+    // Membros têm todos auto-atribuídos ao seu personId
+    const authUser = useAuthStore.getState().user
+    const personId = authUser?.role === 'member' ? (authUser.personId ?? null) : null
+    const todo = await todosRepo.create({ title, done: false, dueDate, personId, cardId: null })
     set((s) => ({ todos: [todo, ...s.todos] }))
     return todo
   },
 
   addTodoToCard: async (cardId, rawText) => {
     const { title, dueDate } = parseCapture(rawText)
-    const todo = await todosRepo.create({ title, done: false, dueDate, personId: null, cardId })
+    // Herda personId do cartão (se houver) ou do usuário logado
+    const card = useKanbanStore.getState().cards.find((c) => c.id === cardId)
+    const authUser = useAuthStore.getState().user
+    const personId =
+      card?.personId ??
+      (authUser?.role === 'member' ? (authUser.personId ?? null) : null)
+    const todo = await todosRepo.create({ title, done: false, dueDate, personId, cardId })
     set((s) => ({ todos: [todo, ...s.todos] }))
     return todo
   },

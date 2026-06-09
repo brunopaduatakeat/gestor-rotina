@@ -16,6 +16,7 @@ import { KanbanCard } from './KanbanCard'
 import { CardModal } from './CardModal'
 import { useKanbanStore } from '../../store/kanban'
 import { useProjectsStore } from '../../store/projects'
+import { useAuthStore } from '../../store/auth'
 import type { Card, CardStatus } from '../../domain/types'
 
 const COLUMNS: CardStatus[] = ['backlog', 'todo', 'doing', 'paused', 'done']
@@ -23,9 +24,18 @@ const COLUMNS: CardStatus[] = ['backlog', 'todo', 'doing', 'paused', 'done']
 export function KanbanBoard() {
   const { cards, moveCard } = useKanbanStore()
   const { projects } = useProjectsStore()
+  const { user } = useAuthStore()
   const [editingCard, setEditingCard] = useState<Card | null | 'new'>(null)
   const [activeCard, setActiveCard] = useState<Card | null>(null)
   const [filterProjectId, setFilterProjectId] = useState<string | null>(null)
+
+  const isManager  = user?.role === 'manager'
+  const myPersonId = user?.personId ?? null
+
+  // Membros veem apenas seus cards (+ cards sem dono)
+  const visibleCards = isManager
+    ? cards
+    : cards.filter((c) => !c.personId || c.personId === myPersonId)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -33,9 +43,9 @@ export function KanbanBoard() {
   )
 
   const filteredCards = useMemo(() => {
-    if (!filterProjectId) return cards
-    return cards.filter((c) => c.projectId === filterProjectId)
-  }, [cards, filterProjectId])
+    if (!filterProjectId) return visibleCards
+    return visibleCards.filter((c) => c.projectId === filterProjectId)
+  }, [visibleCards, filterProjectId])
 
   const cardsByStatus = (status: CardStatus) =>
     filteredCards.filter((c) => c.status === status)
@@ -55,24 +65,26 @@ export function KanbanBoard() {
     if (targetStatus) moveCard(active.id as string, targetStatus)
   }
 
-  // Projetos que têm ao menos um card
+  // Projetos que têm ao menos um card visível
   const activeProjects = useMemo(() => {
-    const ids = new Set(cards.map((c) => c.projectId).filter(Boolean))
+    const ids = new Set(visibleCards.map((c) => c.projectId).filter(Boolean))
     return projects.filter((p) => ids.has(p.id))
-  }, [cards, projects])
+  }, [visibleCards, projects])
 
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Kanban</h1>
-        <button
-          onClick={() => setEditingCard('new')}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-colors"
-          aria-label="Novo cartão"
-        >
-          + Novo Cartão
-        </button>
+        {isManager && (
+          <button
+            onClick={() => setEditingCard('new')}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-colors"
+            aria-label="Novo cartão"
+          >
+            + Novo Cartão
+          </button>
+        )}
       </div>
 
       {/* Filtro por projeto */}
