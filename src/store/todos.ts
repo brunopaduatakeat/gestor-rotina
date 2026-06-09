@@ -9,10 +9,12 @@ interface TodoStore {
   loading: boolean
   load: () => Promise<void>
   addTodo: (rawText: string) => Promise<Todo>
+  addTodoToCard: (cardId: string, rawText: string) => Promise<Todo>
   completeTodo: (id: string) => Promise<void>
   reopenTodo: (id: string) => Promise<void>
   deleteTodo: (id: string) => Promise<void>
   promoteToCard: (id: string) => Promise<void>
+  todosByCard: (cardId: string) => Todo[]
 }
 
 /** Extrai data de linguagem natural do texto; retorna { title, dueDate } */
@@ -40,7 +42,14 @@ export const useTodosStore = create<TodoStore>((set, get) => ({
 
   addTodo: async (rawText) => {
     const { title, dueDate } = parseCapture(rawText)
-    const todo = await todosRepo.create({ title, done: false, dueDate, personId: null })
+    const todo = await todosRepo.create({ title, done: false, dueDate, personId: null, cardId: null })
+    set((s) => ({ todos: [todo, ...s.todos] }))
+    return todo
+  },
+
+  addTodoToCard: async (cardId, rawText) => {
+    const { title, dueDate } = parseCapture(rawText)
+    const todo = await todosRepo.create({ title, done: false, dueDate, personId: null, cardId })
     set((s) => ({ todos: [todo, ...s.todos] }))
     return todo
   },
@@ -63,6 +72,8 @@ export const useTodosStore = create<TodoStore>((set, get) => ({
     await todosRepo.delete(id)
     set((s) => ({ todos: s.todos.filter((t) => t.id !== id) }))
   },
+
+  todosByCard: (cardId) => get().todos.filter((t) => t.cardId === cardId),
 
   promoteToCard: async (id) => {
     const todo = get().todos.find((t) => t.id === id)

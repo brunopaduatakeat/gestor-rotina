@@ -98,7 +98,10 @@ export function calcTodayData(
     (m) => m.date >= startOfDay.getTime() && m.date <= endOfDay.getTime()
   ).sort((a, b) => a.date - b.date)
 
-  const pendingTodos = todos.filter((t) => !t.done && !t.promotedToCardId && t.dueDate !== null)
+  // Inclui to-dos standalone E vinculados a cards (ambos aparecem no Hoje se tiverem prazo)
+  const pendingTodos = todos.filter(
+    (t) => !t.done && !t.promotedToCardId && t.dueDate !== null
+  )
   const dueTodos = pendingTodos.filter(
     (t) => t.dueDate! >= startOfDay.getTime() && t.dueDate! <= endOfDay.getTime()
   )

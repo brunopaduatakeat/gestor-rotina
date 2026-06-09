@@ -24,6 +24,7 @@ function makeMeeting(overrides: Partial<Meeting> = {}): Meeting {
   return {
     id: 'm1', category: '1on1', date: NOW, personIds: ['p1'],
     agenda: 'original', notes: 'original notes',
+    projectId: null, cardId: null,
     createdAt: NOW - 1000, updatedAt: NOW - 1000, ...overrides,
   }
 }

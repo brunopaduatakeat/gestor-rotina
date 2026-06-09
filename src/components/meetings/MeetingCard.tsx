@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useMeetingsStore } from '../../store/meetings'
 import { usePersonsStore } from '../../store/persons'
+import { useProjectsStore } from '../../store/projects'
 import { MeetingForm } from './MeetingForm'
 import { FollowUpItem } from './FollowUpItem'
 import type { Meeting } from '../../domain/types'
@@ -25,6 +26,7 @@ interface Props {
 export function MeetingCard({ meeting }: Props) {
   const { deleteMeeting, followUpsByMeeting } = useMeetingsStore()
   const { getById } = usePersonsStore()
+  const { getById: getProject } = useProjectsStore()
   const [editing, setEditing] = useState(false)
   const [expanded, setExpanded] = useState(false)
 
@@ -32,6 +34,7 @@ export function MeetingCard({ meeting }: Props) {
   const followUps = followUpsByMeeting(meeting.id)
   const pendingCount = followUps.filter((f) => !f.done).length
   const participants = meeting.personIds.map((id) => getById(id)?.name ?? '?').join(', ')
+  const project = meeting.projectId ? getProject(meeting.projectId) : null
 
   return (
     <>
@@ -43,6 +46,11 @@ export function MeetingCard({ meeting }: Props) {
               <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${style.badge}`}>
                 {style.label}
               </span>
+              {project && (
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
+                  {project.title}
+                </span>
+              )}
               <span className="text-xs text-slate-400 dark:text-slate-500">
                 {new Date(meeting.date).toLocaleDateString('pt-BR', {
                   weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useMeetingsStore } from '../../store/meetings'
 import { usePersonsStore } from '../../store/persons'
+import { useProjectsStore } from '../../store/projects'
 import { PendingFollowUps } from './PendingFollowUps'
 import type { Meeting, MeetingCategory } from '../../domain/types'
 
@@ -18,6 +19,7 @@ const CATEGORY_LABELS: Record<MeetingCategory, string> = {
 export function MeetingForm({ meeting, preselectedPersonId, onClose }: Props) {
   const { addMeeting, updateMeeting, addFollowUp, pendingFollowUpsByPerson } = useMeetingsStore()
   const { persons } = usePersonsStore()
+  const { projects } = useProjectsStore()
   const dialogRef = useRef<HTMLDialogElement>(null)
   const isNew = !meeting
 
@@ -33,6 +35,7 @@ export function MeetingForm({ meeting, preselectedPersonId, onClose }: Props) {
   const [agenda, setAgenda] = useState(meeting?.agenda ?? '')
   const [notes, setNotes] = useState(meeting?.notes ?? '')
   const [newFollowUp, setNewFollowUp] = useState('')
+  const [projectId, setProjectId] = useState<string>(meeting?.projectId ?? '')
 
   // Follow-ups pendentes da pessoa selecionada (só para 1-on-1)
   const pendingFUs =
@@ -61,6 +64,8 @@ export function MeetingForm({ meeting, preselectedPersonId, onClose }: Props) {
       personIds,
       agenda: agenda.trim(),
       notes: notes.trim(),
+      projectId: projectId || null,
+      cardId: meeting?.cardId ?? null,
     }
 
     let savedId: string
@@ -184,6 +189,25 @@ export function MeetingForm({ meeting, preselectedPersonId, onClose }: Props) {
         <textarea className={`${inputCls} resize-none h-20`} placeholder="O que foi discutido…"
           value={notes} onChange={(e) => setNotes(e.target.value)} />
       </label>
+
+      {/* Projeto relacionado */}
+      {projects.filter((p) => p.status !== 'cancelled').length > 0 && (
+        <label className="flex flex-col gap-1">
+          <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Projeto relacionado</span>
+          <select
+            className={inputCls}
+            value={projectId}
+            onChange={(e) => setProjectId(e.target.value)}
+          >
+            <option value="">— Nenhum —</option>
+            {projects
+              .filter((p) => p.status !== 'cancelled')
+              .map((p) => (
+                <option key={p.id} value={p.id}>{p.title}</option>
+              ))}
+          </select>
+        </label>
+      )}
 
       {/* Novo follow-up */}
       <label className="flex flex-col gap-1">

@@ -13,7 +13,7 @@ class GestorDB extends Dexie {
   constructor() {
     super('GestorRotina')
 
-    // v1 — schema inicial. Para adicionar campos: bumpe a versão e declare .upgrade()
+    // v1 — schema inicial
     this.version(1).stores({
       cards:      'id, status, personId, projectId, dueDate, createdAt',
       todos:      'id, done, dueDate, personId, createdAt',
@@ -22,6 +22,26 @@ class GestorDB extends Dexie {
       followUps:  'id, meetingId, personId, done, createdAt',
       projects:   'id, status, dueDate, createdAt, *personIds',
       logEntries: 'id, entityType, entityId, action, createdAt',
+    })
+
+    // v2 — to-dos vinculados a cards; reuniões vinculadas a projetos/cards
+    this.version(2).stores({
+      cards:      'id, status, personId, projectId, dueDate, createdAt',
+      todos:      'id, done, dueDate, personId, cardId, createdAt',
+      persons:    'id, name, createdAt',
+      meetings:   'id, category, date, projectId, cardId, createdAt, *personIds',
+      followUps:  'id, meetingId, personId, done, createdAt',
+      projects:   'id, status, dueDate, createdAt, *personIds',
+      logEntries: 'id, entityType, entityId, action, createdAt',
+    }).upgrade(tx => {
+      // Garante campos novos em registros existentes
+      tx.table('todos').toCollection().modify((todo: any) => {
+        if (todo.cardId === undefined) todo.cardId = null
+      })
+      tx.table('meetings').toCollection().modify((meeting: any) => {
+        if (meeting.projectId === undefined) meeting.projectId = null
+        if (meeting.cardId === undefined) meeting.cardId = null
+      })
     })
   }
 }

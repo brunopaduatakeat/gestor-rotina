@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -15,19 +15,30 @@ import { KanbanColumn } from './KanbanColumn'
 import { KanbanCard } from './KanbanCard'
 import { CardModal } from './CardModal'
 import { useKanbanStore } from '../../store/kanban'
+import { useProjectsStore } from '../../store/projects'
 import type { Card, CardStatus } from '../../domain/types'
 
 const COLUMNS: CardStatus[] = ['backlog', 'todo', 'doing', 'paused', 'done']
 
 export function KanbanBoard() {
-  const { cards, moveCard, cardsByStatus } = useKanbanStore()
+  const { cards, moveCard } = useKanbanStore()
+  const { projects } = useProjectsStore()
   const [editingCard, setEditingCard] = useState<Card | null | 'new'>(null)
   const [activeCard, setActiveCard] = useState<Card | null>(null)
+  const [filterProjectId, setFilterProjectId] = useState<string | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
+
+  const filteredCards = useMemo(() => {
+    if (!filterProjectId) return cards
+    return cards.filter((c) => c.projectId === filterProjectId)
+  }, [cards, filterProjectId])
+
+  const cardsByStatus = (status: CardStatus) =>
+    filteredCards.filter((c) => c.status === status)
 
   const handleDragStart = ({ active }: DragStartEvent) => {
     const card = cards.find((c) => c.id === active.id)
@@ -44,9 +55,16 @@ export function KanbanBoard() {
     if (targetStatus) moveCard(active.id as string, targetStatus)
   }
 
+  // Projetos que têm ao menos um card
+  const activeProjects = useMemo(() => {
+    const ids = new Set(cards.map((c) => c.projectId).filter(Boolean))
+    return projects.filter((p) => ids.has(p.id))
+  }, [cards, projects])
+
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between mb-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Kanban</h1>
         <button
           onClick={() => setEditingCard('new')}
@@ -56,6 +74,36 @@ export function KanbanBoard() {
           + Novo Cartão
         </button>
       </div>
+
+      {/* Filtro por projeto */}
+      {activeProjects.length > 0 && (
+        <div className="flex items-center gap-2 flex-wrap mb-5">
+          <span className="text-xs text-slate-400 dark:text-slate-500 shrink-0">Filtrar:</span>
+          <button
+            onClick={() => setFilterProjectId(null)}
+            className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+              filterProjectId === null
+                ? 'bg-blue-600 border-blue-600 text-white'
+                : 'border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-blue-400 dark:hover:border-blue-500'
+            }`}
+          >
+            Todos
+          </button>
+          {activeProjects.map((p) => (
+            <button
+              key={p.id}
+              onClick={() => setFilterProjectId(p.id === filterProjectId ? null : p.id)}
+              className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                filterProjectId === p.id
+                  ? 'bg-blue-600 border-blue-600 text-white'
+                  : 'border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-blue-400 dark:hover:border-blue-500'
+              }`}
+            >
+              {p.title}
+            </button>
+          ))}
+        </div>
+      )}
 
       <DndContext
         sensors={sensors}

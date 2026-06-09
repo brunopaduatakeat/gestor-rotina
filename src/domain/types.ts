@@ -35,6 +35,7 @@ export interface Todo {
   dueDate: number | null
   personId: string | null
   promotedToCardId: string | null  // null = não promovido
+  cardId: string | null            // vinculado a um cartão Kanban (sub-tarefa)
   createdAt: number
   updatedAt: number
 }
@@ -54,6 +55,8 @@ export interface Meeting {
   personIds: string[]       // participantes
   agenda: string
   notes: string
+  projectId: string | null  // projeto relacionado (opcional)
+  cardId: string | null     // cartão Kanban relacionado (opcional)
   createdAt: number
   updatedAt: number
 }

@@ -2,7 +2,7 @@ import { db } from '../db'
 import { logRepo } from './log'
 import type { Todo } from '../../domain/types'
 
-type CreateTodo = Omit<Todo, 'id' | 'createdAt' | 'updatedAt' | 'promotedToCardId'>
+type CreateTodo = Omit<Todo, 'id' | 'createdAt' | 'updatedAt' | 'promotedToCardId' | 'cardId'> & { cardId?: string | null }
 type UpdateTodo = Partial<Omit<Todo, 'id' | 'createdAt'>>
 
 export const todosRepo = {
@@ -12,6 +12,7 @@ export const todosRepo = {
       id: crypto.randomUUID(),
       ...data,
       promotedToCardId: null,
+      cardId: data.cardId ?? null,
       createdAt: now,
       updatedAt: now,
     }
@@ -50,4 +51,6 @@ export const todosRepo = {
   getAll: () => db.todos.orderBy('createdAt').toArray(),
   getPending: () => db.todos.where('done').equals(0).sortBy('createdAt'),
   getById: (id: string) => db.todos.get(id),
+  getByCard: (cardId: string) =>
+    db.todos.where('cardId').equals(cardId).sortBy('createdAt'),
 }

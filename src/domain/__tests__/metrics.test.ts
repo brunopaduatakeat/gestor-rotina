@@ -16,14 +16,16 @@ function makeCard(overrides: Partial<Card> = {}): Card {
 function makeMeeting(overrides: Partial<Meeting> = {}): Meeting {
   return {
     id: crypto.randomUUID(), category: '1on1', date: NOW,
-    personIds: [], agenda: '', notes: '', createdAt: NOW, updatedAt: NOW, ...overrides,
+    personIds: [], agenda: '', notes: '', projectId: null, cardId: null,
+    createdAt: NOW, updatedAt: NOW, ...overrides,
   }
 }
 
 function makeTodo(overrides: Partial<Todo> = {}): Todo {
   return {
     id: crypto.randomUUID(), title: 'Test', done: false, dueDate: null,
-    personId: null, promotedToCardId: null, createdAt: NOW, updatedAt: NOW, ...overrides,
+    personId: null, promotedToCardId: null, cardId: null,
+    createdAt: NOW, updatedAt: NOW, ...overrides,
   }
 }
 

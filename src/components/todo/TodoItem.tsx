@@ -1,12 +1,16 @@
 import { useTodosStore } from '../../store/todos'
 import type { Todo } from '../../domain/types'
 
-interface Props { todo: Todo }
+interface Props {
+  todo: Todo
+  cardTitle?: string   // badge do cartão Kanban ao qual está vinculado
+}
 
-export function TodoItem({ todo }: Props) {
+export function TodoItem({ todo, cardTitle }: Props) {
   const { completeTodo, reopenTodo, deleteTodo, promoteToCard } = useTodosStore()
   const overdue = todo.dueDate && todo.dueDate < Date.now() && !todo.done
   const promoted = !!todo.promotedToCardId
+  const isCardLinked = !!todo.cardId
 
   return (
     <li
@@ -30,20 +34,28 @@ export function TodoItem({ todo }: Props) {
         <p className={`text-sm ${todo.done ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-100'}`}>
           {todo.title}
         </p>
-        {todo.dueDate && (
-          <p className={`text-xs mt-0.5 ${overdue ? 'text-red-500 dark:text-red-400' : 'text-slate-400 dark:text-slate-500'}`}>
-            {overdue ? '⚠ ' : ''}
-            {new Date(todo.dueDate).toLocaleDateString('pt-BR', {
-              day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
-            })}
-          </p>
-        )}
-        {promoted && (
-          <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5">↗ Promovido para Kanban</p>
-        )}
+
+        <div className="flex items-center gap-2 flex-wrap mt-0.5">
+          {todo.dueDate && (
+            <p className={`text-xs ${overdue ? 'text-red-500 dark:text-red-400' : 'text-slate-400 dark:text-slate-500'}`}>
+              {overdue ? '⚠ ' : ''}
+              {new Date(todo.dueDate).toLocaleDateString('pt-BR', {
+                day: '2-digit', month: 'short',
+              })}
+            </p>
+          )}
+          {cardTitle && (
+            <span className="text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-medium">
+              📋 {cardTitle}
+            </span>
+          )}
+          {promoted && (
+            <span className="text-xs text-blue-600 dark:text-blue-400">↗ Kanban</span>
+          )}
+        </div>
       </div>
 
-      {!todo.done && !promoted && (
+      {!todo.done && !promoted && !isCardLinked && (
         <div className="flex gap-1 shrink-0">
           <button
             onClick={() => promoteToCard(todo.id)}
@@ -61,6 +73,16 @@ export function TodoItem({ todo }: Props) {
             ✕
           </button>
         </div>
+      )}
+
+      {!todo.done && isCardLinked && (
+        <button
+          onClick={() => deleteTodo(todo.id)}
+          className="text-xs text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shrink-0"
+          aria-label={`Excluir tarefa "${todo.title}"`}
+        >
+          ✕
+        </button>
       )}
     </li>
   )

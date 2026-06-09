@@ -2,13 +2,23 @@ import { db } from '../db'
 import { logRepo } from './log'
 import type { Meeting } from '../../domain/types'
 
-type CreateMeeting = Omit<Meeting, 'id' | 'createdAt' | 'updatedAt'>
+type CreateMeeting = Omit<Meeting, 'id' | 'createdAt' | 'updatedAt' | 'projectId' | 'cardId'> & {
+  projectId?: string | null
+  cardId?: string | null
+}
 type UpdateMeeting = Partial<Omit<Meeting, 'id' | 'createdAt'>>
 
 export const meetingsRepo = {
   async create(data: CreateMeeting): Promise<Meeting> {
     const now = Date.now()
-    const meeting: Meeting = { id: crypto.randomUUID(), ...data, createdAt: now, updatedAt: now }
+    const meeting: Meeting = {
+      id: crypto.randomUUID(),
+      ...data,
+      projectId: data.projectId ?? null,
+      cardId: data.cardId ?? null,
+      createdAt: now,
+      updatedAt: now,
+    }
     await db.meetings.add(meeting)
     await logRepo.add('meeting', meeting.id, 'created', {
       category: meeting.category,

@@ -3,6 +3,7 @@ import { useKanbanStore } from '../../store/kanban'
 import { useTodosStore } from '../../store/todos'
 import { useMeetingsStore } from '../../store/meetings'
 import { usePersonsStore } from '../../store/persons'
+import { useProjectsStore } from '../../store/projects'
 import { calcTodayData } from '../../domain/metrics'
 import type { Meeting, Todo, Card, FollowUp } from '../../domain/types'
 
@@ -22,7 +23,15 @@ function Section({ title, count, accent, children }: {
 }
 
 // ─── Itens ───────────────────────────────────────────────────────────────────
-function MeetingRow({ meeting, personName }: { meeting: Meeting; personName: string }) {
+function MeetingRow({
+  meeting,
+  personName,
+  projectTitle,
+}: {
+  meeting: Meeting
+  personName: string
+  projectTitle?: string
+}) {
   const isOneOnOne = meeting.category === '1on1'
   return (
     <div className="flex items-center gap-3 py-2 border-b border-slate-100 dark:border-slate-700/50 last:border-0">
@@ -31,6 +40,11 @@ function MeetingRow({ meeting, personName }: { meeting: Meeting; personName: str
         <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
           {isOneOnOne ? '1-on-1' : 'Alinhamento'} — {personName}
         </p>
+        {projectTitle && (
+          <span className="text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-medium">
+            {projectTitle}
+          </span>
+        )}
       </div>
       <span className="text-xs text-slate-400 dark:text-slate-500 shrink-0">
         {new Date(meeting.date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
@@ -39,11 +53,26 @@ function MeetingRow({ meeting, personName }: { meeting: Meeting; personName: str
   )
 }
 
-function TodoRow({ todo, overdue }: { todo: Todo; overdue?: boolean }) {
+function TodoRow({
+  todo,
+  overdue,
+  cardTitle,
+}: {
+  todo: Todo
+  overdue?: boolean
+  cardTitle?: string
+}) {
   return (
     <div className="flex items-center gap-2 py-2 border-b border-slate-100 dark:border-slate-700/50 last:border-0">
       <span className="text-base">{overdue ? '🔴' : '🟡'}</span>
-      <p className="text-sm text-slate-800 dark:text-slate-200 flex-1 truncate">{todo.title}</p>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm text-slate-800 dark:text-slate-200 truncate">{todo.title}</p>
+        {cardTitle && (
+          <span className="text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-medium">
+            📋 {cardTitle}
+          </span>
+        )}
+      </div>
       {todo.dueDate && (
         <span className={`text-xs shrink-0 ${overdue ? 'text-red-500 dark:text-red-400' : 'text-slate-400 dark:text-slate-500'}`}>
           {new Date(todo.dueDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
@@ -81,7 +110,14 @@ export function TodayView() {
   const { cards } = useKanbanStore()
   const { todos } = useTodosStore()
   const { meetings, followUps } = useMeetingsStore()
-  const { getById } = usePersonsStore()
+  const { getById: getPerson } = usePersonsStore()
+  const { getById: getProject } = useProjectsStore()
+
+  // Mapas para lookup rápido
+  const cardMap = useMemo(
+    () => Object.fromEntries(cards.map((c) => [c.id, c.title])),
+    [cards]
+  )
 
   const today = useMemo(
     () => calcTodayData(cards, todos, meetings, followUps),
@@ -120,7 +156,8 @@ export function TodayView() {
                 <MeetingRow
                   key={m.id}
                   meeting={m}
-                  personName={m.personIds.map((id) => getById(id)?.name ?? '?').join(', ')}
+                  personName={m.personIds.map((id) => getPerson(id)?.name ?? '?').join(', ')}
+                  projectTitle={m.projectId ? getProject(m.projectId)?.title : undefined}
                 />
               ))}
             </div>
@@ -128,13 +165,26 @@ export function TodayView() {
 
           <Section title="Atrasados" count={today.overdueTodos.length} accent="text-red-600 dark:text-red-400">
             <div className="bg-white dark:bg-slate-800 rounded-xl px-4 shadow-sm dark:shadow-none">
-              {today.overdueTodos.map((t) => <TodoRow key={t.id} todo={t} overdue />)}
+              {today.overdueTodos.map((t) => (
+                <TodoRow
+                  key={t.id}
+                  todo={t}
+                  overdue
+                  cardTitle={t.cardId ? cardMap[t.cardId] : undefined}
+                />
+              ))}
             </div>
           </Section>
 
           <Section title="Prazo hoje" count={today.dueTodos.length} accent="text-yellow-600 dark:text-yellow-400">
             <div className="bg-white dark:bg-slate-800 rounded-xl px-4 shadow-sm dark:shadow-none">
-              {today.dueTodos.map((t) => <TodoRow key={t.id} todo={t} />)}
+              {today.dueTodos.map((t) => (
+                <TodoRow
+                  key={t.id}
+                  todo={t}
+                  cardTitle={t.cardId ? cardMap[t.cardId] : undefined}
+                />
+              ))}
             </div>
           </Section>
 
@@ -144,7 +194,7 @@ export function TodayView() {
                 <FollowUpRow
                   key={f.id}
                   followUp={f}
-                  personName={getById(f.personId)?.name ?? '?'}
+                  personName={getPerson(f.personId)?.name ?? '?'}
                 />
               ))}
             </div>
