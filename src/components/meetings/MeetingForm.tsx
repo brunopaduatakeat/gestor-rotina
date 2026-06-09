@@ -3,6 +3,7 @@ import { useMeetingsStore } from '../../store/meetings'
 import { usePersonsStore } from '../../store/persons'
 import { useProjectsStore } from '../../store/projects'
 import { PendingFollowUps } from './PendingFollowUps'
+import { MarkdownEditor } from '../ui/MarkdownEditor'
 import type { Meeting, MeetingCategory } from '../../domain/types'
 
 interface Props {
@@ -177,18 +178,26 @@ export function MeetingForm({ meeting, preselectedPersonId, onClose }: Props) {
       </div>
 
       {/* Pauta */}
-      <label className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1">
         <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Pauta</span>
-        <textarea className={`${inputCls} resize-none h-16`} placeholder="Tópicos a discutir…"
-          value={agenda} onChange={(e) => setAgenda(e.target.value)} />
-      </label>
+        <MarkdownEditor
+          value={agenda}
+          onChange={setAgenda}
+          placeholder="Tópicos a discutir… suporta **markdown**"
+          minRows={3}
+        />
+      </div>
 
       {/* Anotações */}
-      <label className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1">
         <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Anotações</span>
-        <textarea className={`${inputCls} resize-none h-20`} placeholder="O que foi discutido…"
-          value={notes} onChange={(e) => setNotes(e.target.value)} />
-      </label>
+        <MarkdownEditor
+          value={notes}
+          onChange={setNotes}
+          placeholder="O que foi discutido… suporta **markdown**"
+          minRows={4}
+        />
+      </div>
 
       {/* Projeto relacionado */}
       {projects.filter((p) => p.status !== 'cancelled').length > 0 && (

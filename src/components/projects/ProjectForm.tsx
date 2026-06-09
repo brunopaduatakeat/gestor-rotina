@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useProjectsStore } from '../../store/projects'
 import { usePersonsStore } from '../../store/persons'
+import { MarkdownEditor } from '../ui/MarkdownEditor'
 import type { Project, ProjectStatus } from '../../domain/types'
 
 interface Props {
@@ -63,11 +64,15 @@ export function ProjectForm({ project, onClose }: Props) {
           onChange={(e) => setTitle(e.target.value)} autoFocus />
       </label>
 
-      <label className="flex flex-col gap-1 text-xs text-slate-500 dark:text-slate-400">
+      <div className="flex flex-col gap-1 text-xs text-slate-500 dark:text-slate-400">
         Descrição
-        <textarea className={`${inputCls} resize-none h-16`} placeholder="Objetivo e escopo…"
-          value={description} onChange={(e) => setDescription(e.target.value)} />
-      </label>
+        <MarkdownEditor
+          value={description}
+          onChange={setDescription}
+          placeholder="Objetivo e escopo… suporta **markdown**"
+          minRows={3}
+        />
+      </div>
 
       <div className="grid grid-cols-2 gap-3">
         <label className="flex flex-col gap-1 text-xs text-slate-500 dark:text-slate-400">

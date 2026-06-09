@@ -3,6 +3,7 @@ import { useProjectsStore } from '../../store/projects'
 import { usePersonsStore } from '../../store/persons'
 import { useKanbanStore } from '../../store/kanban'
 import { ProjectForm } from './ProjectForm'
+import { MarkdownContent } from '../ui/MarkdownContent'
 import type { Project, ProjectStatus } from '../../domain/types'
 
 const STATUS_STYLE: Record<ProjectStatus, { badge: string; label: string }> = {
@@ -36,7 +37,9 @@ export function ProjectCard({ project }: { project: Project }) {
               </span>
             </div>
             {project.description && (
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">{project.description}</p>
+              <div className="mt-1">
+                <MarkdownContent>{project.description}</MarkdownContent>
+              </div>
             )}
           </div>
           <div className="flex gap-1 shrink-0">

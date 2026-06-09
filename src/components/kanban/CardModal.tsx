@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { useKanbanStore } from '../../store/kanban'
 import { useProjectsStore } from '../../store/projects'
 import { useTodosStore } from '../../store/todos'
+import { MarkdownEditor } from '../ui/MarkdownEditor'
 import type { Card, CardStatus, Priority } from '../../domain/types'
 
 const STATUSES: CardStatus[] = ['backlog', 'todo', 'doing', 'paused', 'done']
@@ -193,8 +194,12 @@ export function CardModal({ card, onClose }: Props) {
       <input className={inputCls} placeholder="Título *" value={title}
         onChange={(e) => setTitle(e.target.value)} autoFocus />
 
-      <textarea className={`${inputCls} resize-none h-20`} placeholder="Descrição"
-        value={description} onChange={(e) => setDescription(e.target.value)} />
+      <MarkdownEditor
+        value={description}
+        onChange={setDescription}
+        placeholder="Descrição — suporta **markdown**"
+        minRows={4}
+      />
 
       <div className="grid grid-cols-2 gap-3">
         <label className="flex flex-col gap-1 text-xs text-slate-500 dark:text-slate-400">

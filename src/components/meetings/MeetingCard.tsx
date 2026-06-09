@@ -4,6 +4,7 @@ import { usePersonsStore } from '../../store/persons'
 import { useProjectsStore } from '../../store/projects'
 import { MeetingForm } from './MeetingForm'
 import { FollowUpItem } from './FollowUpItem'
+import { MarkdownContent } from '../ui/MarkdownContent'
 import type { Meeting } from '../../domain/types'
 
 const CATEGORY_STYLE = {
@@ -73,10 +74,12 @@ export function MeetingCard({ meeting }: Props) {
 
         {/* Pauta */}
         {meeting.agenda && (
-          <p className="text-sm text-slate-700 dark:text-slate-300 mt-3 leading-relaxed">
-            <span className="text-xs text-slate-400 dark:text-slate-500 font-medium mr-1">Pauta:</span>
-            {meeting.agenda}
-          </p>
+          <div className="mt-3">
+            <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">Pauta:</span>
+            <div className="mt-1">
+              <MarkdownContent>{meeting.agenda}</MarkdownContent>
+            </div>
+          </div>
         )}
 
         {/* Anotações + follow-ups */}
@@ -99,9 +102,9 @@ export function MeetingCard({ meeting }: Props) {
         {expanded && (
           <div className="mt-3 space-y-3">
             {meeting.notes && (
-              <p className="text-sm text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3 leading-relaxed whitespace-pre-wrap">
-                {meeting.notes}
-              </p>
+              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3">
+                <MarkdownContent>{meeting.notes}</MarkdownContent>
+              </div>
             )}
             {followUps.length > 0 && (
               <ul className="divide-y divide-slate-100 dark:divide-slate-700/50">
