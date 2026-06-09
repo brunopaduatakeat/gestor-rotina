@@ -40,4 +40,18 @@ export async function ensureTables() {
     auth       TEXT NOT NULL,
     created_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000)
   )`)
+  // ── Usuários e sessões ─────────────────────────────────────────────────────
+  await db.execute(`CREATE TABLE IF NOT EXISTS users (
+    id            TEXT PRIMARY KEY,
+    name          TEXT NOT NULL,
+    email         TEXT UNIQUE NOT NULL,
+    role          TEXT NOT NULL DEFAULT 'member',
+    password_hash TEXT NOT NULL,
+    created_at    INTEGER NOT NULL DEFAULT (unixepoch() * 1000)
+  )`)
+  await db.execute(`CREATE TABLE IF NOT EXISTS sessions (
+    token      TEXT PRIMARY KEY,
+    user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    expires_at INTEGER NOT NULL
+  )`)
 }

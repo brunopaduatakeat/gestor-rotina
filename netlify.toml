@@ -33,6 +33,30 @@
   status = 200
   force = true
 
+[[redirects]]
+  from = "/api/auth/register"
+  to = "/.netlify/functions/auth-register"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/auth/login"
+  to = "/.netlify/functions/auth-login"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/auth/me"
+  to = "/.netlify/functions/auth-me"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/auth/create-member"
+  to = "/.netlify/functions/auth-create-member"
+  status = 200
+  force = true
+
 
 [[redirects]]
   from = "/api/sync/calendar"

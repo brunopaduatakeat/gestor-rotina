@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { usePersonsStore } from '../../store/persons'
+import { useAuthStore } from '../../store/auth'
 import { PersonForm } from './PersonForm'
+import { CreateMemberModal } from './CreateMemberModal'
 import type { Person } from '../../domain/types'
 import type { PersonMetrics } from '../../domain/metrics'
 
@@ -20,7 +22,10 @@ function MetricPill({ value, label, warn }: { value: string; label: string; warn
 
 export function PersonCard({ person, metrics }: Props) {
   const { deletePerson } = usePersonsStore()
-  const [editing, setEditing] = useState(false)
+  const { user } = useAuthStore()
+  const [editing, setEditing]           = useState(false)
+  const [creatingAccess, setCreatingAccess] = useState(false)
+  const isManager = user?.role === 'manager'
 
   const lastOneOnOneLabel =
     metrics.daysSinceLastOneOnOne === null
@@ -52,7 +57,14 @@ export function PersonCard({ person, metrics }: Props) {
               <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{person.role}</p>
             )}
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-1 items-center">
+            {isManager && (
+              <button onClick={() => setCreatingAccess(true)}
+                className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 px-2 py-1 rounded hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors"
+                title="Criar acesso de login para este membro">
+                🔑 Acesso
+              </button>
+            )}
             <button onClick={() => setEditing(true)}
               className="text-xs text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
               Editar
@@ -94,7 +106,8 @@ export function PersonCard({ person, metrics }: Props) {
         )}
       </div>
 
-      {editing && <PersonForm person={person} onClose={() => setEditing(false)} />}
+      {editing        && <PersonForm person={person} onClose={() => setEditing(false)} />}
+      {creatingAccess && <CreateMemberModal person={person} onClose={() => setCreatingAccess(false)} />}
     </>
   )
 }
