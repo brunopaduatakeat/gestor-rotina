@@ -1,10 +1,13 @@
 import { google } from 'googleapis'
 
 /**
- * GET /api/auth/google
+ * GET /api/auth/google?token=JWT
  * Redireciona o usuário para a página de consentimento do Google.
+ * O JWT é passado como `state` para ser recuperado no callback.
  */
-export const handler = async () => {
+export const handler = async (event) => {
+  const jwtToken = event.queryStringParameters?.token ?? ''
+
   const oauth2 = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
@@ -17,6 +20,7 @@ export const handler = async () => {
     scope: [
       'https://www.googleapis.com/auth/calendar',
     ],
+    state: jwtToken,            // devolto intacto pelo Google no callback
   })
 
   return {

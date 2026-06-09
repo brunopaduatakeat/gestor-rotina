@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { checkCalendarStatus, connectGoogleCalendar, syncCalendar } from '../../adapters/googleCalendar'
 import { useMeetingsStore } from '../../store/meetings'
+import { useAuthStore } from '../../store/auth'
 
 type SyncStatus = 'idle' | 'syncing' | 'success' | 'error'
 
 export function CalendarSync() {
+  const { token } = useAuthStore()
   const [connected, setConnected] = useState<boolean | null>(null)
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle')
   const [syncError, setSyncError] = useState('')
@@ -16,9 +18,9 @@ export function CalendarSync() {
   const { meetings } = useMeetingsStore()
 
   useEffect(() => {
-    checkCalendarStatus().then(setConnected)
+    checkCalendarStatus(token).then(setConnected)
 
-    // Detecta retorno do fluxo OAuth — suporta /#settings?connected=1 e ?connected=1
+    // Detecta retorno do fluxo OAuth
     const hashQuery = window.location.hash.includes('?')
       ? window.location.hash.slice(window.location.hash.indexOf('?') + 1)
       : ''
@@ -33,12 +35,14 @@ export function CalendarSync() {
       setSyncError(`Erro OAuth: ${params.get('error')}`)
       window.history.replaceState(null, '', window.location.pathname)
     }
-  }, [])
+  }, [token])
 
   const handleDisconnect = async () => {
     if (!confirm('Desconectar o Google Calendar? O histórico local permanece intacto.')) return
     try {
-      await fetch('/api/auth/disconnect', { method: 'POST' })
+      const headers: Record<string, string> = {}
+      if (token) headers['Authorization'] = `Bearer ${token}`
+      await fetch('/api/auth/disconnect', { method: 'POST', headers })
     } catch { /* ignora falha de rede */ }
     localStorage.removeItem('lastCalendarSync')
     setConnected(false)
@@ -50,9 +54,8 @@ export function CalendarSync() {
     setSyncStatus('syncing')
     setSyncError('')
     try {
-      // Envia só reuniões sem googleEventId (novas/modificadas localmente)
       const toSync = meetings.filter((m) => !(m as any).googleEventId)
-      await syncCalendar(toSync)
+      await syncCalendar(toSync, token)
       const now = Date.now()
       setLastSync(now)
       localStorage.setItem('lastCalendarSync', String(now))
@@ -95,7 +98,7 @@ export function CalendarSync() {
             está cadastrado no Google Cloud Console.
           </p>
           <button
-            onClick={connectGoogleCalendar}
+            onClick={() => connectGoogleCalendar(token)}
             className="self-start flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -132,9 +135,7 @@ export function CalendarSync() {
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
             >
               {syncStatus === 'syncing' ? (
-                <>
-                  <span className="animate-spin text-xs">⟳</span> Sincronizando…
-                </>
+                <><span className="animate-spin text-xs">⟳</span> Sincronizando…</>
               ) : syncStatus === 'success' ? (
                 '✓ Sincronizado'
               ) : (

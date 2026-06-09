@@ -1,30 +1,35 @@
 import { google } from 'googleapis'
 import { ensureTables } from './_db.mjs'
 import { getAuthenticatedClient } from './_oauth.mjs'
+import { requireAuth, corsHeaders } from './_jwt.mjs'
 
 const CALENDAR_ID = 'primary'
 const cors = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  ...corsHeaders,
+  'Content-Type': 'application/json',
 }
 
 /**
  * GET /api/calendar/events?range=week|today
- * Retorna eventos do Google Calendar para hoje ou a semana atual.
- * Não modifica syncToken — apenas leitura para exibição.
+ * Header: Authorization: Bearer JWT
+ * Retorna eventos do Google Calendar para hoje ou a semana atual (leitura).
  */
 export const handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 204, headers: cors, body: '' }
   }
 
+  const authPayload = requireAuth(event)
+  if (!authPayload?.userId) {
+    return { statusCode: 401, headers: cors, body: JSON.stringify({ error: 'NOT_CONNECTED' }) }
+  }
+
   try {
     await ensureTables()
-    const auth = await getAuthenticatedClient()
+    const auth = await getAuthenticatedClient(authPayload.userId)
     const cal = google.calendar({ version: 'v3', auth })
 
     const range = event.queryStringParameters?.range ?? 'week'
-
     const now = new Date()
     const startOfDay = new Date(now)
     startOfDay.setHours(0, 0, 0, 0)
@@ -34,7 +39,6 @@ export const handler = async (event) => {
       timeMax = new Date(now)
       timeMax.setHours(23, 59, 59, 999)
     } else {
-      // Semana: domingo a sábado da semana atual
       const endOfWeek = new Date(startOfDay)
       endOfWeek.setDate(startOfDay.getDate() + (6 - startOfDay.getDay()))
       endOfWeek.setHours(23, 59, 59, 999)
@@ -62,7 +66,7 @@ export const handler = async (event) => {
           location:    e.location ?? '',
           start:       startRaw ? new Date(startRaw).getTime() : null,
           end:         endRaw   ? new Date(endRaw).getTime()   : null,
-          allDay:      !e.start?.dateTime,   // true quando vem só date
+          allDay:      !e.start?.dateTime,
           organizer:   e.organizer?.email ?? '',
           htmlLink:    e.htmlLink ?? '',
         }
@@ -70,7 +74,7 @@ export const handler = async (event) => {
 
     return {
       statusCode: 200,
-      headers: { ...cors, 'Content-Type': 'application/json' },
+      headers: cors,
       body: JSON.stringify({ events: items }),
     }
   } catch (err) {
@@ -78,7 +82,6 @@ export const handler = async (event) => {
     if (msg === 'NOT_CONNECTED') {
       return { statusCode: 401, headers: cors, body: JSON.stringify({ error: 'NOT_CONNECTED' }) }
     }
-    // Erro de autenticação do Google (ex: invalid_grant, token revogado)
     if (msg.includes('invalid_grant') || msg.includes('Token has been expired') || err?.code === 401) {
       return { statusCode: 401, headers: cors, body: JSON.stringify({ error: 'NOT_CONNECTED' }) }
     }

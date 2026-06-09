@@ -1,7 +1,7 @@
 // Service Worker — Gestor de Rotina
 // Estratégia: cache-first para assets estáticos, network-first para API
 
-const CACHE_NAME = 'gestor-v1'
+const CACHE_NAME = 'gestor-v2'
 const STATIC_ASSETS = ['/', '/index.html']
 
 self.addEventListener('install', (event) => {

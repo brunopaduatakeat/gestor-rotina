@@ -54,4 +54,20 @@ export async function ensureTables() {
     user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     expires_at INTEGER NOT NULL
   )`)
+  // ── Google Calendar por usuário ────────────────────────────────────────────
+  await db.execute(`CREATE TABLE IF NOT EXISTS user_google_tokens (
+    user_id       TEXT PRIMARY KEY,
+    access_token  TEXT NOT NULL,
+    refresh_token TEXT NOT NULL,
+    expiry_date   INTEGER NOT NULL,
+    created_at    INTEGER NOT NULL DEFAULT (unixepoch() * 1000),
+    updated_at    INTEGER NOT NULL DEFAULT (unixepoch() * 1000)
+  )`)
+  await db.execute(`CREATE TABLE IF NOT EXISTS user_sync_state (
+    user_id     TEXT NOT NULL,
+    calendar_id TEXT NOT NULL,
+    sync_token  TEXT,
+    last_sync   INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, calendar_id)
+  )`)
 }

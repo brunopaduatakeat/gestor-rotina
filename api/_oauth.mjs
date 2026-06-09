@@ -2,17 +2,20 @@ import { google } from 'googleapis'
 import { getDB } from './_db.mjs'
 
 /**
- * Retorna um OAuth2Client autenticado com tokens do Turso.
+ * Retorna um OAuth2Client autenticado com tokens do Turso para um usuário específico.
  * Faz refresh automático se o access_token expirou.
  * Lança 'NOT_CONNECTED' se não houver tokens ou se o refresh falhar.
  */
-export async function getAuthenticatedClient() {
+export async function getAuthenticatedClient(userId) {
+  if (!userId) throw new Error('NOT_CONNECTED')
+
   const db = getDB()
   let row
   try {
-    row = await db.execute(
-      `SELECT access_token, refresh_token, expiry_date FROM google_tokens WHERE id = 'default' LIMIT 1`
-    )
+    row = await db.execute({
+      sql: `SELECT access_token, refresh_token, expiry_date FROM user_google_tokens WHERE user_id = ? LIMIT 1`,
+      args: [userId],
+    })
   } catch (dbErr) {
     console.error('[oauth] DB error:', dbErr)
     throw new Error('NOT_CONNECTED')
@@ -41,15 +44,16 @@ export async function getAuthenticatedClient() {
 
       // Persiste tokens atualizados
       await db.execute({
-        sql: `UPDATE google_tokens SET access_token = ?, expiry_date = ?, updated_at = ? WHERE id = 'default'`,
-        args: [credentials.access_token, credentials.expiry_date ?? 0, Date.now()],
+        sql: `UPDATE user_google_tokens SET access_token = ?, expiry_date = ?, updated_at = ? WHERE user_id = ?`,
+        args: [credentials.access_token, credentials.expiry_date ?? 0, Date.now(), userId],
       })
     } catch (refreshErr) {
-      // Token revogado / expirado sem possibilidade de refresh → pede reconexão
       console.error('[oauth] Token refresh failed:', refreshErr?.message ?? refreshErr)
-      // Remove o token inválido para que o frontend mostre "desconectado"
       try {
-        await db.execute(`DELETE FROM google_tokens WHERE id = 'default'`)
+        await db.execute({
+          sql: `DELETE FROM user_google_tokens WHERE user_id = ?`,
+          args: [userId],
+        })
       } catch (_) { /* ignora */ }
       throw new Error('NOT_CONNECTED')
     }
@@ -59,12 +63,14 @@ export async function getAuthenticatedClient() {
 }
 
 /** Verifica se o usuário está conectado ao Google */
-export async function isConnected() {
+export async function isConnected(userId) {
+  if (!userId) return false
   try {
     const db = getDB()
-    const row = await db.execute(
-      `SELECT id FROM google_tokens WHERE id = 'default' LIMIT 1`
-    )
+    const row = await db.execute({
+      sql: `SELECT user_id FROM user_google_tokens WHERE user_id = ? LIMIT 1`,
+      args: [userId],
+    })
     return row.rows.length > 0
   } catch {
     return false

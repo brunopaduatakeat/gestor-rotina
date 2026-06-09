@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useAuthStore } from '../../store/auth'
 
 interface GCalEvent {
   id: string
@@ -29,13 +30,16 @@ function dayLabel(ts: number) {
 }
 
 export function GoogleAgendaPanel() {
+  const { token } = useAuthStore()
   const [range, setRange] = useState<Range>('week')
   const [events, setEvents] = useState<GCalEvent[]>([])
   const [status, setStatus] = useState<'loading' | 'ok' | 'disconnected' | 'error'>('loading')
 
   useEffect(() => {
     setStatus('loading')
-    fetch(`/api/calendar/events?range=${range}`)
+    const headers: Record<string, string> = {}
+    if (token) headers['Authorization'] = `Bearer ${token}`
+    fetch(`/api/calendar/events?range=${range}`, { headers })
       .then(async (r) => {
         if (r.status === 401) { setStatus('disconnected'); return }
         if (!r.ok) {
