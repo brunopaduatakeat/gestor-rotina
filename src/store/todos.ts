@@ -17,10 +17,21 @@ interface TodoStore {
   todosByCard: (cardId: string) => Todo[]
 }
 
-/** Extrai data de linguagem natural do texto; retorna { title, dueDate } */
-function parseCapture(raw: string): { title: string; dueDate: number | null } {
+/** Retorna timestamp para amanhã às 09:00 (D+1 padrão) */
+function tomorrow(): number {
+  const d = new Date()
+  d.setDate(d.getDate() + 1)
+  d.setHours(9, 0, 0, 0)
+  return d.getTime()
+}
+
+/**
+ * Extrai data de linguagem natural do texto; retorna { title, dueDate }.
+ * Se nenhuma data for encontrada, usa D+1 (amanhã às 09:00) como padrão.
+ */
+function parseCapture(raw: string): { title: string; dueDate: number } {
   const result = chrono.parse(raw, new Date(), { forwardDate: true })
-  if (result.length === 0) return { title: raw.trim(), dueDate: null }
+  if (result.length === 0) return { title: raw.trim(), dueDate: tomorrow() }
   const match = result[0]
   const dueDate = match.date().getTime()
   // Remove o trecho de data do título
