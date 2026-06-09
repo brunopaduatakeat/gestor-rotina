@@ -4,10 +4,10 @@ import { useAlarmScheduler } from './hooks/useAlarmScheduler'
 import { useAutoBackup } from './hooks/useAutoBackup'
 import { NotificationPermission, NotificationStatus } from './components/notifications/NotificationPermission'
 import { AlarmModal } from './components/notifications/AlarmModal'
+import { AlertsDropdown } from './components/notifications/AlertsDropdown'
 import { ErrorBoundary, ErrorFallback } from './components/ErrorBoundary'
 
 // Lazy loading por rota — cada página é um chunk separado
-const TodayPage    = lazy(() => import('./pages/TodayPage').then((m) => ({ default: m.TodayPage })))
 const KanbanPage   = lazy(() => import('./pages/KanbanPage').then((m) => ({ default: m.KanbanPage })))
 const TodoPage     = lazy(() => import('./pages/TodoPage').then((m) => ({ default: m.TodoPage })))
 const MeetingsPage = lazy(() => import('./pages/MeetingsPage').then((m) => ({ default: m.MeetingsPage })))
@@ -15,12 +15,11 @@ const TeamPage     = lazy(() => import('./pages/TeamPage').then((m) => ({ defaul
 const ProjectsPage = lazy(() => import('./pages/ProjectsPage').then((m) => ({ default: m.ProjectsPage })))
 const SettingsPage = lazy(() => import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage })))
 
-type Page = 'today' | 'kanban' | 'todo' | 'meetings' | 'team' | 'projects' | 'settings'
+type Page = 'kanban' | 'todo' | 'meetings' | 'team' | 'projects' | 'settings'
 
 const NAV: { id: Page; label: string }[] = [
-  { id: 'today',    label: 'Hoje' },
-  { id: 'kanban',   label: 'Kanban' },
   { id: 'todo',     label: 'To-Do' },
+  { id: 'kanban',   label: 'Kanban' },
   { id: 'meetings', label: 'Reuniões' },
   { id: 'team',     label: 'Equipe' },
   { id: 'projects', label: 'Projetos' },
@@ -39,7 +38,7 @@ export default function App() {
   const [page, setPage] = useState<Page>(() => {
     // Se voltou do OAuth, abre direto em Config
     if (window.location.hash.includes('settings')) return 'settings'
-    return 'today'
+    return 'todo'
   })
   const { theme, toggle } = useTheme()
   const { activeAlarm, dismissAlarm } = useAlarmScheduler()
@@ -70,6 +69,9 @@ export default function App() {
           ))}
         </nav>
 
+        {/* Alertas de prazo / tarefas paradas */}
+        <AlertsDropdown />
+
         {/* Botão de tema */}
         <button
           onClick={toggle}
@@ -97,9 +99,8 @@ export default function App() {
       <main className="flex-1 overflow-auto p-6">
         <ErrorBoundary fallback={(props) => <ErrorFallback error={props.error as Error} resetError={props.resetError} />}>
           <Suspense fallback={<PageLoader />}>
-            {page === 'today'    && <TodayPage />}
-            {page === 'kanban'   && <KanbanPage />}
             {page === 'todo'     && <TodoPage />}
+            {page === 'kanban'   && <KanbanPage />}
             {page === 'meetings' && <MeetingsPage />}
             {page === 'team'     && <TeamPage />}
             {page === 'projects' && <ProjectsPage />}

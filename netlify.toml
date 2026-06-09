@@ -34,6 +34,18 @@
   status = 200
   force = true
 
+[[redirects]]
+  from = "/api/calendar/events"
+  to = "/.netlify/functions/calendar-events"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/hubspot/users"
+  to = "/.netlify/functions/hubspot-users"
+  status = 200
+  force = true
+
 # SPA catch-all (deve ser sempre o último)
 [[redirects]]
   from = "/*"

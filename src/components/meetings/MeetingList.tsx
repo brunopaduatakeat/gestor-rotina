@@ -3,6 +3,7 @@ import { useMeetingsStore } from '../../store/meetings'
 import { usePersonsStore } from '../../store/persons'
 import { MeetingCard } from './MeetingCard'
 import { MeetingForm } from './MeetingForm'
+import { GoogleAgendaPanel } from './GoogleAgendaPanel'
 import type { MeetingCategory } from '../../domain/types'
 
 export function MeetingList() {
@@ -25,7 +26,7 @@ export function MeetingList() {
   const showBothTracks = filterCategory === 'all'
 
   return (
-    <div className="flex flex-col gap-6 max-w-4xl">
+    <div className="flex flex-col gap-6 max-w-5xl">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Reuniões</h1>
@@ -104,6 +105,11 @@ export function MeetingList() {
       )}
 
       {showForm && <MeetingForm onClose={() => setShowForm(false)} />}
+
+      {/* Espelho da agenda do Google */}
+      <div className="border-t border-slate-200 dark:border-slate-700 pt-6">
+        <GoogleAgendaPanel />
+      </div>
     </div>
   )
 }
