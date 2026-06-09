@@ -38,12 +38,20 @@ export function GoogleAgendaPanel() {
     fetch(`/api/calendar/events?range=${range}`)
       .then(async (r) => {
         if (r.status === 401) { setStatus('disconnected'); return }
-        if (!r.ok) { setStatus('error'); return }
+        if (!r.ok) {
+          // Tenta mostrar mensagem real
+          try {
+            const body = await r.json()
+            console.error('[GoogleAgenda] API error:', body.error)
+          } catch (_) {}
+          setStatus('error')
+          return
+        }
         const data = await r.json()
         setEvents(data.events ?? [])
         setStatus('ok')
       })
-      .catch(() => setStatus('error'))
+      .catch((e) => { console.error('[GoogleAgenda] fetch error:', e); setStatus('error') })
   }, [range])
 
   // Agrupa por dia

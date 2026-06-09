@@ -49,7 +49,15 @@ export async function syncCalendar(
 
   if (res.status === 401) throw new Error('NOT_CONNECTED')
   if (res.status === 409) throw new Error('SYNC_TOKEN_EXPIRED')
-  if (!res.ok) throw new Error(`Sync failed: ${res.status}`)
+  if (!res.ok) {
+    // Tenta ler mensagem real do corpo
+    let detail = `HTTP ${res.status}`
+    try {
+      const body = await res.json()
+      detail = body.error ?? detail
+    } catch { /* ignora */ }
+    throw new Error(detail)
+  }
 
   return res.json()
 }

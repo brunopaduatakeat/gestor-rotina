@@ -74,10 +74,15 @@ export const handler = async (event) => {
       body: JSON.stringify({ events: items }),
     }
   } catch (err) {
-    if (err.message === 'NOT_CONNECTED') {
+    const msg = err?.message ?? String(err)
+    if (msg === 'NOT_CONNECTED') {
       return { statusCode: 401, headers: cors, body: JSON.stringify({ error: 'NOT_CONNECTED' }) }
     }
-    console.error('calendar-events error:', err)
-    return { statusCode: 500, headers: cors, body: JSON.stringify({ error: err.message }) }
+    // Erro de autenticação do Google (ex: invalid_grant, token revogado)
+    if (msg.includes('invalid_grant') || msg.includes('Token has been expired') || err?.code === 401) {
+      return { statusCode: 401, headers: cors, body: JSON.stringify({ error: 'NOT_CONNECTED' }) }
+    }
+    console.error('[calendar-events] error:', msg, err?.stack)
+    return { statusCode: 500, headers: cors, body: JSON.stringify({ error: msg }) }
   }
 }

@@ -52,10 +52,13 @@ export function CalendarSync() {
       if (err.message === 'SYNC_TOKEN_EXPIRED') {
         setSyncError('Token de sync expirado. O próximo sync fará uma sincronização completa.')
       } else if (err.message === 'NOT_CONNECTED') {
-        setSyncError('Google Calendar não conectado.')
+        setSyncError('Sessão expirada. Reconecte o Google Calendar abaixo.')
+        setConnected(false)
+      } else if (err.message?.includes('invalid_grant')) {
+        setSyncError('Sessão Google expirada. Clique em "Conectar" para autorizar novamente.')
         setConnected(false)
       } else {
-        setSyncError(err.message)
+        setSyncError(err.message ?? 'Erro desconhecido.')
       }
     }
   }
