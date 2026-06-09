@@ -35,6 +35,17 @@ export function CalendarSync() {
     }
   }, [])
 
+  const handleDisconnect = async () => {
+    if (!confirm('Desconectar o Google Calendar? O histórico local permanece intacto.')) return
+    try {
+      await fetch('/api/auth/disconnect', { method: 'POST' })
+    } catch { /* ignora falha de rede */ }
+    localStorage.removeItem('lastCalendarSync')
+    setConnected(false)
+    setSyncStatus('idle')
+    setSyncError('')
+  }
+
   const handleSync = async () => {
     setSyncStatus('syncing')
     setSyncError('')
@@ -114,7 +125,7 @@ export function CalendarSync() {
             Sync automático a cada 15 minutos via cron. Use o botão para sync manual imediato.
           </p>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <button
               onClick={handleSync}
               disabled={syncStatus === 'syncing'}
@@ -129,6 +140,12 @@ export function CalendarSync() {
               ) : (
                 '⟳ Sincronizar agora'
               )}
+            </button>
+            <button
+              onClick={handleDisconnect}
+              className="flex items-center gap-2 px-4 py-2 bg-transparent border border-red-400 dark:border-red-500 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 text-sm font-medium rounded-lg transition-colors"
+            >
+              Desconectar
             </button>
           </div>
 

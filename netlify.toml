@@ -27,6 +27,12 @@
   status = 200
   force = true
 
+[[redirects]]
+  from = "/api/auth/disconnect"
+  to = "/.netlify/functions/auth-disconnect"
+  status = 200
+  force = true
+
 
 [[redirects]]
   from = "/api/sync/calendar"
