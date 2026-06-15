@@ -1,5 +1,6 @@
 import { db } from '../db'
 import { logRepo } from './log'
+import { trashRepo } from './trash'
 import type { Card, CardStatus } from '../../domain/types'
 
 type CreateCard = Omit<Card, 'id' | 'createdAt' | 'updatedAt'>
@@ -27,8 +28,10 @@ export const cardsRepo = {
 
   async delete(id: string): Promise<void> {
     const card = await db.cards.get(id)
+    if (!card) return
+    await trashRepo.softDelete('card', card as unknown as Record<string, unknown>)
     await db.cards.delete(id)
-    await logRepo.add('card', id, 'deleted', { title: card?.title })
+    await logRepo.add('card', id, 'deleted', { title: card.title })
   },
 
   getAll: () => db.cards.orderBy('createdAt').toArray(),

@@ -1,5 +1,6 @@
 import { db } from '../db'
 import { logRepo } from './log'
+import { trashRepo } from './trash'
 import type { FollowUp } from '../../domain/types'
 
 type CreateFollowUp = Omit<FollowUp, 'id' | 'createdAt' | 'updatedAt'>
@@ -30,6 +31,9 @@ export const followUpsRepo = {
   },
 
   async delete(id: string): Promise<void> {
+    const fu = await db.followUps.get(id)
+    if (!fu) return
+    await trashRepo.softDelete('followUp', fu as unknown as Record<string, unknown>)
     await db.followUps.delete(id)
     await logRepo.add('followUp', id, 'deleted', {})
   },

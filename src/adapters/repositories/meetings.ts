@@ -1,5 +1,6 @@
 import { db } from '../db'
 import { logRepo } from './log'
+import { trashRepo } from './trash'
 import type { Meeting } from '../../domain/types'
 
 type CreateMeeting = Omit<Meeting, 'id' | 'createdAt' | 'updatedAt' | 'projectId' | 'cardId'> & {
@@ -35,6 +36,9 @@ export const meetingsRepo = {
   },
 
   async delete(id: string): Promise<void> {
+    const meeting = await db.meetings.get(id)
+    if (!meeting) return
+    await trashRepo.softDelete('meeting', meeting as unknown as Record<string, unknown>)
     await db.meetings.delete(id)
     await logRepo.add('meeting', id, 'deleted', {})
   },

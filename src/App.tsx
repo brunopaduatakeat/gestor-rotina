@@ -7,6 +7,7 @@ import { AlarmModal } from './components/notifications/AlarmModal'
 import { AlertsDropdown } from './components/notifications/AlertsDropdown'
 import { ErrorBoundary, ErrorFallback } from './components/ErrorBoundary'
 import { useAuthStore } from './store/auth'
+import { useTrashStore } from './store/trash'
 import { LoginPage } from './pages/LoginPage'
 
 // Lazy loading por rota — cada página é um chunk separado
@@ -16,8 +17,9 @@ const MeetingsPage = lazy(() => import('./pages/MeetingsPage').then((m) => ({ de
 const TeamPage     = lazy(() => import('./pages/TeamPage').then((m) => ({ default: m.TeamPage })))
 const ProjectsPage = lazy(() => import('./pages/ProjectsPage').then((m) => ({ default: m.ProjectsPage })))
 const SettingsPage = lazy(() => import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage })))
+const TrashPage    = lazy(() => import('./pages/TrashPage').then((m) => ({ default: m.TrashPage })))
 
-type Page = 'kanban' | 'todo' | 'meetings' | 'team' | 'projects' | 'settings'
+type Page = 'kanban' | 'todo' | 'meetings' | 'team' | 'projects' | 'settings' | 'trash'
 
 const NAV_MANAGER: { id: Page; label: string }[] = [
   { id: 'todo',     label: 'To-Do' },
@@ -26,6 +28,7 @@ const NAV_MANAGER: { id: Page; label: string }[] = [
   { id: 'team',     label: 'Equipe' },
   { id: 'projects', label: 'Projetos' },
   { id: 'settings', label: 'Config' },
+  { id: 'trash',    label: 'Lixeira' },
 ]
 
 const NAV_MEMBER: { id: Page; label: string }[] = [
@@ -33,6 +36,7 @@ const NAV_MEMBER: { id: Page; label: string }[] = [
   { id: 'kanban',   label: 'Kanban' },
   { id: 'meetings', label: 'Reuniões' },
   { id: 'projects', label: 'Projetos' },
+  { id: 'trash',    label: 'Lixeira' },
 ]
 
 function PageLoader() {
@@ -51,7 +55,10 @@ function AppShell() {
   const { theme, toggle } = useTheme()
   const { activeAlarm, dismissAlarm } = useAlarmScheduler()
   const { user, logout } = useAuthStore()
+  const purgeExpired = useTrashStore((s) => s.purgeExpired)
   useAutoBackup()
+
+  useEffect(() => { purgeExpired() }, [])
 
   const isManager = user?.role === 'manager'
   const nav = isManager ? NAV_MANAGER : NAV_MEMBER
@@ -145,6 +152,7 @@ function AppShell() {
             {page === 'team'     && isManager && <TeamPage />}
             {page === 'projects' && <ProjectsPage />}
             {page === 'settings' && isManager && <SettingsPage />}
+            {page === 'trash'    && <TrashPage />}
           </Suspense>
         </ErrorBoundary>
       </main>

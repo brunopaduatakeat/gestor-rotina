@@ -1,4 +1,5 @@
 import { CalendarSync } from '../components/settings/CalendarSync'
+import { TrashPanel } from '../components/trash/TrashPanel'
 import { downloadExport } from '../adapters/export'
 import { getLastAutoBackup } from '../hooks/useAutoBackup'
 import { useTheme } from '../hooks/useTheme'
@@ -106,6 +107,12 @@ export function SettingsPage() {
             ↓ Exportar JSON
           </button>
         </div>
+      </section>
+
+      {/* Lixeira */}
+      <section className="flex flex-col gap-3">
+        <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">Lixeira</h2>
+        <TrashPanel />
       </section>
     </div>
   )

@@ -92,3 +92,11 @@ export interface LogEntry {
   payload: Record<string, unknown>  // snapshot relevante do evento
   createdAt: number                 // imutável — nunca atualizar
 }
+
+export interface TrashEntry {
+  id: string
+  entityType: EntityType
+  entityId: string
+  entityData: Record<string, unknown>  // snapshot completo da entidade
+  deletedAt: number
+}
