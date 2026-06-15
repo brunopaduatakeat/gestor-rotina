@@ -1,5 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie'
-import type { Card, Todo, Person, Meeting, FollowUp, Project, LogEntry } from '../domain/types'
+import type { Card, Todo, Person, Meeting, FollowUp, Project, LogEntry, TrashEntry } from '../domain/types'
 
 class GestorDB extends Dexie {
   cards!: EntityTable<Card, 'id'>
@@ -9,6 +9,7 @@ class GestorDB extends Dexie {
   followUps!: EntityTable<FollowUp, 'id'>
   projects!: EntityTable<Project, 'id'>
   logEntries!: EntityTable<LogEntry, 'id'>
+  trash!: EntityTable<TrashEntry, 'id'>
 
   constructor() {
     super('GestorRotina')
@@ -42,6 +43,18 @@ class GestorDB extends Dexie {
         if (meeting.projectId === undefined) meeting.projectId = null
         if (meeting.cardId === undefined) meeting.cardId = null
       })
+    })
+
+    // v3 — lixeira com recuperação em até 7 dias
+    this.version(3).stores({
+      cards:      'id, status, personId, projectId, dueDate, createdAt',
+      todos:      'id, done, dueDate, personId, cardId, createdAt',
+      persons:    'id, name, createdAt',
+      meetings:   'id, category, date, projectId, cardId, createdAt, *personIds',
+      followUps:  'id, meetingId, personId, done, createdAt',
+      projects:   'id, status, dueDate, createdAt, *personIds',
+      logEntries: 'id, entityType, entityId, action, createdAt',
+      trash:      'id, entityType, entityId, deletedAt',
     })
   }
 }

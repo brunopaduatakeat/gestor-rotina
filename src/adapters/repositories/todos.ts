@@ -1,5 +1,6 @@
 import { db } from '../db'
 import { logRepo } from './log'
+import { trashRepo } from './trash'
 import type { Todo } from '../../domain/types'
 
 type CreateTodo = Omit<Todo, 'id' | 'createdAt' | 'updatedAt' | 'promotedToCardId' | 'cardId'> & { cardId?: string | null }
@@ -44,8 +45,10 @@ export const todosRepo = {
 
   async delete(id: string): Promise<void> {
     const todo = await db.todos.get(id)
+    if (!todo) return
+    await trashRepo.softDelete('todo', todo as unknown as Record<string, unknown>)
     await db.todos.delete(id)
-    await logRepo.add('todo', id, 'deleted', { title: todo?.title })
+    await logRepo.add('todo', id, 'deleted', { title: todo.title })
   },
 
   getAll: () => db.todos.orderBy('createdAt').toArray(),
